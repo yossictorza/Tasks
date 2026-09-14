@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>המשימות שלנו</title>
 
-  <!-- הגדרות תצוגה כאפליקציה במסך הבית (PWA) -->
+  <!-- הגדרות PWA ומנורת התקנה -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/906/906334.png">
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D7%94%D7%9E%D7%A9%D7%99%D7%9E%D7%95%D7%AA%20%D7%A9%D7%9C%D7%90%D7%95%22%2C%22short_name%22%3A%22%D7%9E%D7%A9%D7%99%D7%9E%D7%95%D7%AA%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f3f4f6%22%2C%22theme_color%22%3A%22%234f46e5%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F906%2F906334.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -21,7 +22,12 @@
 </head>
 <body class="max-w-md mx-auto p-4 min-h-screen pb-20">
 
-  <!-- כותרת ותאריך עברי/לועזי משולב -->
+  <!-- כפתור התקנה (מופיע בראש הדף) -->
+  <button id="install-btn" onclick="installPWA()" class="w-full mb-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-sm">
+    📲 התקן את האפליקציה במסך הבית
+  </button>
+
+  <!-- כותרת ותאריך -->
   <header class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center mb-5">
     <h1 class="text-2xl font-bold text-gray-800 mb-1">📋 המשימות שלנו</h1>
     <div id="current-date" class="text-sm font-bold text-indigo-600"></div>
@@ -139,6 +145,27 @@
     const db = firebase.firestore();
 
     let currentFilter = 'הכל';
+    let deferredPrompt = null;
+
+    // זיהוי אפשרות התקנה
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('install-btn').style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        alert('להתקנה במכשיר:\n• באנדרואיד: לחץ על 3 הנקודות בדפדפן ובחר "הוסף למסך הבית".\n• באייפון: לחץ על כפתור השיתוף בתחתית הדפדפן ובחר "הוסף למסך הבית".');
+      }
+    }
 
     // הצגת תאריך עברי ולועזי בראש העמוד
     function displayCurrentDate() {
@@ -185,7 +212,6 @@
     }
     initHebrewDatePicker();
 
-    // הפעלה/ביטול של תיבות התאריך לפי המתג
     function toggleDateSection() {
       const enabled = document.getElementById('enable-date-toggle').checked;
       const container = document.getElementById('date-selects-container');
@@ -196,7 +222,6 @@
       }
     }
 
-    // הוספת משימה
     function addTask() {
       const titleInput = document.getElementById('task-title');
       const category = document.getElementById('task-category').value;
