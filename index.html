@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>המשימות שלנו</title>
+
+  <!-- הגדרות תצוגה כאפליקציה במסך הבית (PWA) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/906/906334.png">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -13,10 +21,10 @@
 </head>
 <body class="max-w-md mx-auto p-4 min-h-screen pb-20">
 
-  <!-- כותרת ותאריך -->
+  <!-- כותרת ותאריך עברי/לועזי משולב -->
   <header class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center mb-5">
     <h1 class="text-2xl font-bold text-gray-800 mb-1">📋 המשימות שלנו</h1>
-    <div id="current-date" class="text-sm font-medium text-indigo-600"></div>
+    <div id="current-date" class="text-sm font-bold text-indigo-600"></div>
   </header>
 
   <!-- טופס הוספת משימה -->
@@ -24,7 +32,7 @@
     <h2 class="text-base font-bold text-gray-700 mb-3">➕ הוספת משימה חדשה</h2>
     
     <div class="space-y-3">
-      <input type="text" id="task-title" placeholder="מה צריך לעשות/לקנות?" class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <input type="text" id="task-title" placeholder="מה צריך לעשות/לקנות?" class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
       
       <div class="grid grid-cols-2 gap-2">
         <div>
@@ -46,38 +54,60 @@
         </div>
       </div>
 
-      <!-- בחירת תאריך עברי -->
-      <div>
-        <label class="block text-xs text-gray-500 mb-1">תאריך יעד עברי (אופציונלי)</label>
-        <div class="grid grid-cols-2 gap-2">
-          <select id="heb-day" class="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm">
-            <option value="">יום</option>
-            <option value="א'">א'</option><option value="ב'">ב'</option><option value="ג'">ג'</option>
-            <option value="ד'">ד'</option><option value="ה'">ה'</option><option value="ו'">ו'</option>
-            <option value="ז'">ז'</option><option value="ח'">ח'</option><option value="ט'">ט'</option>
-            <option value="י'">י'</option><option value="י''א">י"א</option><option value="י''ב">י"ב</option>
-            <option value="י''ג">י"ג</option><option value="י''ד">י"ד</option><option value="ט''ו">ט"ו</option>
-            <option value="ט''ז">ט"ז</option><option value="י''ז">י"ז</option><option value="י''ח">י"ח</option>
-            <option value="י''ט">י"ט</option><option value="כ'">כ'</option><option value="כ''א">כ"א</option>
-            <option value="כ''ב">כ"ב</option><option value="כ''ג">כ"ג</option><option value="כ''ד">כ"ד</option>
-            <option value="כ''ה">כ"ה</option><option value="כ''ו">כ"ו</option><option value="כ''ז">כ"ז</option>
-            <option value="כ''ח">כ"ח</option><option value="כ''ט">כ"ט</option><option value="ל'">ל'</option>
-          </select>
+      <!-- מתג ובחירת תאריך עברי -->
+      <div class="border border-gray-100 rounded-xl p-3 bg-gray-50">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-gray-700">תאריך יעד עברי</span>
+          <label class="flex items-center gap-2 cursor-pointer text-xs text-indigo-600 font-bold">
+            <input type="checkbox" id="enable-date-toggle" onchange="toggleDateSection()" class="w-4 h-4 accent-indigo-600 rounded">
+            להוסיף תאריך?
+          </label>
+        </div>
 
-          <select id="heb-month" class="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm">
-            <option value="">חודש</option>
-            <option value="תשרי">תשרי</option><option value="חשוון">חשוון</option>
-            <option value="כסלו">כסלו</option><option value="טבת">טבת</option>
-            <option value="שבט">שבט</option><option value="אדר">אדר</option>
-            <option value="אדר א'">אדר א'</option><option value="אדר ב'">אדר ב'</option>
-            <option value="ניסן">ניסן</option><option value="אייר">אייר</option>
-            <option value="סיוון">סיוון</option><option value="תמוז">תמוז</option>
-            <option value="אב">אב</option><option value="אלול">אלול</option>
-          </select>
+        <div id="date-selects-container" class="grid grid-cols-3 gap-1.5 opacity-40 pointer-events-none transition-all">
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-0.5">יום</label>
+            <select id="heb-day" class="w-full p-2 border border-gray-200 rounded-lg bg-white text-xs">
+              <option value="א'">א'</option><option value="ב'">ב'</option><option value="ג'">ג'</option>
+              <option value="ד'">ד'</option><option value="ה'">ה'</option><option value="ו'">ו'</option>
+              <option value="ז'">ז'</option><option value="ח'">ח'</option><option value="ט'">ט'</option>
+              <option value="י'">י'</option><option value="י''א">י"א</option><option value="י''ב">י"ב</option>
+              <option value="י''ג">י"ג</option><option value="י''ד">י"ד</option><option value="ט''ו">ט"ו</option>
+              <option value="ט''ז">ט"ז</option><option value="י''ז">י"ז</option><option value="י''ח">י"ח</option>
+              <option value="י''ט">י"ט</option><option value="כ'">כ'</option><option value="כ''א">כ"א</option>
+              <option value="כ''ב">כ"ב</option><option value="כ''ג">כ"ג</option><option value="כ''ד">כ"ד</option>
+              <option value="כ''ה">כ"ה</option><option value="כ''ו">כ"ו</option><option value="כ''ז">כ"ז</option>
+              <option value="כ''ח">כ"ח</option><option value="כ''ט">כ"ט</option><option value="ל'">ל'</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-0.5">חודש</label>
+            <select id="heb-month" class="w-full p-2 border border-gray-200 rounded-lg bg-white text-xs">
+              <option value="תשרי">תשרי</option><option value="חשוון">חשוון</option>
+              <option value="כסלו">כסלו</option><option value="טבת">טבת</option>
+              <option value="שבט">שבט</option><option value="אדר">אדר</option>
+              <option value="אדר א'">אדר א'</option><option value="אדר ב'">אדר ב'</option>
+              <option value="ניסן">ניסן</option><option value="אייר">אייר</option>
+              <option value="סיוון">סיוון</option><option value="תמוז">תמוז</option>
+              <option value="אב">אב</option><option value="אלול">אלול</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-0.5">שנה</label>
+            <select id="heb-year" class="w-full p-2 border border-gray-200 rounded-lg bg-white text-xs">
+              <option value="תשפ&quot;ו">תשפ"ו</option>
+              <option value="תשפ&quot;ז">תשפ"ז</option>
+              <option value="תשפ&quot;ח">תשפ"ח</option>
+              <option value="תשפ&quot;ט">תשפ"ט</option>
+              <option value="תש&quot;ץ">תש"ץ</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-md">
+      <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-md text-sm">
         הוסף לרשימה
       </button>
     </div>
@@ -92,7 +122,7 @@
 
   <!-- רשימת משימות -->
   <main id="tasks-list" class="space-y-2">
-    <div class="text-center text-gray-400 py-8">טוען משימות...</div>
+    <div class="text-center text-gray-400 py-8 text-sm">טוען משימות...</div>
   </main>
 
   <script>
@@ -110,6 +140,7 @@
 
     let currentFilter = 'הכל';
 
+    // הצגת תאריך עברי ולועזי בראש העמוד
     function displayCurrentDate() {
       const today = new Date();
       const gregDate = today.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -118,19 +149,72 @@
     }
     displayCurrentDate();
 
+    // הגדרת ברירת מחדל של התיבות לתאריך העברי של היום
+    function initHebrewDatePicker() {
+      const today = new Date();
+      const parts = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(today);
+
+      let d = '', m = '', y = '';
+      parts.forEach(p => {
+        if (p.type === 'day') d = p.value;
+        if (p.type === 'month') m = p.value;
+        if (p.type === 'year') y = p.value;
+      });
+
+      const daySel = document.getElementById('heb-day');
+      const dNum = parseInt(d, 10);
+      if (!isNaN(dNum) && dNum >= 1 && dNum <= daySel.options.length) {
+        daySel.selectedIndex = dNum - 1;
+      }
+
+      const monthSel = document.getElementById('heb-month');
+      for (let i = 0; i < monthSel.options.length; i++) {
+        if (m.includes(monthSel.options[i].value) || monthSel.options[i].value.includes(m.replace('ב',''))) {
+          monthSel.selectedIndex = i;
+          break;
+        }
+      }
+
+      const yearSel = document.getElementById('heb-year');
+      for (let i = 0; i < yearSel.options.length; i++) {
+        if (y.includes(yearSel.options[i].value) || yearSel.options[i].value.includes(y)) {
+          yearSel.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    initHebrewDatePicker();
+
+    // הפעלה/ביטול של תיבות התאריך לפי המתג
+    function toggleDateSection() {
+      const enabled = document.getElementById('enable-date-toggle').checked;
+      const container = document.getElementById('date-selects-container');
+      if (enabled) {
+        container.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        container.classList.add('opacity-40', 'pointer-events-none');
+      }
+    }
+
+    // הוספת משימה
     function addTask() {
       const titleInput = document.getElementById('task-title');
       const category = document.getElementById('task-category').value;
       const assignee = document.getElementById('task-assignee').value;
-      const day = document.getElementById('heb-day').value;
-      const month = document.getElementById('heb-month').value;
+      const isDateEnabled = document.getElementById('enable-date-toggle').checked;
 
       if (!titleInput.value.trim()) {
         alert('נא להזין תיאור למשימה');
         return;
       }
 
-      const hebDateStr = (day && month) ? `${day} ב${month}` : null;
+      let hebDateStr = null;
+      if (isDateEnabled) {
+        const day = document.getElementById('heb-day').value;
+        const month = document.getElementById('heb-month').value;
+        const year = document.getElementById('heb-year').value;
+        hebDateStr = `${day} ב${month} ${year}`;
+      }
 
       db.collection("tasks").add({
         title: titleInput.value.trim(),
@@ -141,8 +225,8 @@
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         titleInput.value = '';
-        document.getElementById('heb-day').value = '';
-        document.getElementById('heb-month').value = '';
+        document.getElementById('enable-date-toggle').checked = false;
+        toggleDateSection();
       });
     }
 
@@ -150,7 +234,7 @@
       currentFilter = filter;
       ['all', 'yossi', 'esti'].forEach(id => {
         const btn = document.getElementById(`btn-${id}`);
-        if(btn) btn.className = "flex-1 py-2 text-xs font-bold rounded-xl bg-white text-gray-600 border border-gray-200";
+        if (btn) btn.className = "flex-1 py-2 text-xs font-bold rounded-xl bg-white text-gray-600 border border-gray-200";
       });
       
       if (filter === 'הכל') document.getElementById('btn-all').className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white";
@@ -175,7 +259,7 @@
         }
 
         if (tasks.length === 0) {
-          list.innerHTML = '<div class="text-center text-gray-400 py-8">אין משימות ברשימה 🎉</div>';
+          list.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">אין משימות ברשימה 🎉</div>';
           return;
         }
 
