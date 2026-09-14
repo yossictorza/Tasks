@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>המשימות שלנו</title>
+  <!-- Tailwind CSS לעיצוב נקי ומודרני -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background-color: #f3f4f6; }
+  </style>
+</head>
+<body class="max-w-md mx-auto p-4 min-h-screen pb-20">
+
+  <!-- כותרת ותאריך -->
+  <header class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center mb-5">
+    <h1 class="text-2xl font-bold text-gray-800 mb-1">📋 המשימות שלנו</h1>
+    <div id="current-date" class="text-sm font-medium text-indigo-600"></div>
+  </header>
+
+  <!-- טופס הוספת משימה -->
+  <section class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-5">
+    <h2 class="text-base font-bold text-gray-700 mb-3">➕ הוספת משימה חדשה</h2>
+    
+    <div class="space-y-3">
+      <input type="text" id="task-title" placeholder="מה צריך לעשות/לקנות?" class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">קטגוריה</label>
+          <select id="task-category" class="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm">
+            <option value=" קניות">🛒 קניות</option>
+            <option value="מטלות">🏠 מטלות בית</option>
+            <option value="תזכורות">📅 תזכורות</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">אחראי/ת</label>
+          <select id="task-assignee" class="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm">
+            <option value="שניהם">👥 שניהם</option>
+            <option value="יוסי">👦 יוסי</option>
+            <option value="אסתי">👧 אסתי</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">תאריך יעד (אופציונלי)</label>
+        <input type="date" id="task-date" class="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm">
+      </div>
+
+      <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-md">
+        הוסף לרשימה
+      </button>
+    </div>
+  </section>
+
+  <!-- סרגל סינון לפי אחראי -->
+  <div class="flex gap-2 mb-4">
+    <button onclick="setFilter('הכל')" id="btn-all" class="flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white">הכל</button>
+    <button onclick="setFilter('יוסי')" id="btn-yossi" class="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-gray-600 border border-gray-200">יוסי בלבד</button>
+    <button onclick="setFilter('אסתי')" id="btn-esti" class="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-gray-600 border border-gray-200">אסתי בלבד</button>
+  </div>
+
+  <!-- רשימת משימות -->
+  <main id="tasks-list" class="space-y-2">
+    <div class="text-center text-gray-400 py-8">טוען משימות...</div>
+  </main>
+
+  <script>
+    // הגדרות Firebase מתוך החשבון שלך
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8a1TKhbmHRGA04rwQFrrc-6YWElMHakY",
+      authDomain: "home-tasks-54c73.firebaseapp.com",
+      projectId: "home-tasks-54c73",
+      storageBucket: "home-tasks-54c73.firebasestorage.app",
+      messagingSenderId: "1087056925438",
+      appId: "1:1087056925438:web:191955dce8b35efe3cbaf"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let currentFilter = 'הכל';
+
+    // הצגת תאריך יומי משולב (עברי + לועזי)
+    function displayCurrentDate() {
+      const today = new Date();
+      const gregDate = today.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+      const hebDate = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(today);
+      document.getElementById('current-date').innerText = `${hebDate} | ${gregDate}`;
+    }
+    displayCurrentDate();
+
+    // המרת תאריך לועזי לתאריך עברי
+    function formatHebrewDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      const greg = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
+      const heb = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { day: 'numeric', month: 'short' }).format(date);
+      return `${heb} (${greg})`;
+    }
+
+    // הוספת משימה ל-Firebase
+    function addTask() {
+      const titleInput = document.getElementById('task-title');
+      const category = document.getElementById('task-category').value;
+      const assignee = document.getElementById('task-assignee').value;
+      const dueDate = document.getElementById('task-date').value;
+
+      if (!titleInput.value.trim()) {
+        alert('נא להזין תיאור למשימה');
+        return;
+      }
+
+      db.collection("tasks").add({
+        title: titleInput.value.trim(),
+        category: category,
+        assignee: assignee,
+        dueDate: dueDate || null,
+        completed: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        titleInput.value = '';
+        document.getElementById('task-date').value = '';
+      });
+    }
+
+    // שינוי סינון
+    function setFilter(filter) {
+      currentFilter = filter;
+      ['all', 'yossi', 'esti'].forEach(id => {
+        const btn = document.getElementById(`btn-${id}`);
+        btn.className = "flex-1 py-2 text-xs font-bold rounded-xl bg-white text-gray-600 border border-gray-200";
+      });
+      
+      if (filter === 'הכל') document.getElementById('btn-all').className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white";
+      if (filter === 'יוסי') document.getElementById('btn-yossi').className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white";
+      if (filter === 'אסתי') document.getElementById('btn-esti').className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white";
+
+      loadTasks();
+    }
+
+    // טעינת משימות בזמן אמת
+    function loadTasks() {
+      db.collection("tasks").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+        const list = document.getElementById('tasks-list');
+        list.innerHTML = '';
+
+        let tasks = [];
+        snapshot.forEach(doc => {
+          tasks.push({ id: doc.id, ...doc.data() });
+        });
+
+        if (currentFilter !== 'הכל') {
+          tasks = tasks.filter(t => t.assignee === currentFilter || t.assignee === 'שניהם');
+        }
+
+        if (tasks.length === 0) {
+          list.innerHTML = '<div class="text-center text-gray-400 py-8">אין משימות ברשימה 🎉</div>';
+          return;
+        }
+
+        tasks.forEach(task => {
+          const div = document.createElement('div');
+          div.className = `bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between ${task.completed ? 'opacity-50 line-through bg-gray-50' : ''}`;
+
+          const hebDateFormatted = task.dueDate ? formatHebrewDate(task.dueDate) : 'ללא תאריך';
+
+          div.innerHTML = `
+            <div class="flex items-center gap-3">
+              <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.id}', ${task.completed})" class="w-5 h-5 accent-indigo-600 rounded">
+              <div>
+                <p class="font-medium text-gray-800 text-sm">${task.title}</p>
+                <div class="flex gap-2 text-xs text-gray-400 mt-0.5">
+                  <span>${task.category}</span> • 
+                  <span>📅 ${hebDateFormatted}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2.5 py-1 rounded-full font-medium ${task.assignee === 'יוסי' ? 'bg-blue-50 text-blue-600' : task.assignee === 'אסתי' ? 'bg-pink-50 text-pink-600' : 'bg-purple-50 text-purple-600'}">
+                ${task.assignee}
+              </span>
+              <button onclick="deleteTask('${task.id}')" class="text-gray-300 hover:text-red-500 text-sm pr-1">✕</button>
+            </div>
+          `;
+          list.appendChild(div);
+        });
+      });
+    }
+
+    function toggleTask(id, currentStatus) {
+      db.collection("tasks").doc(id).update({ completed: !currentStatus });
+    }
+
+    function deleteTask(id) {
+      db.collection("tasks").doc(id).delete();
+    }
+
+    loadTasks();
+  </script>
+</body>
+</html>
