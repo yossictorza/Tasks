@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>המישמות שלנו v1.0.3</title>
+    <title>המשימות שלנו v1.0.3</title>
 
+    <!-- הגדרות PWA ומטא לטאבלט ונייד -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="המישמות שלנו">
+    <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
 
-    <!-- (ברוחב גבוהה) לוגו ואייקון מותאם אישית למסך הבית -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%234f46e5'/><text x='50%ிற' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='250' fill='white'>V</text></svg>">
+    <!-- קישור לקובץ ה-Manifest החיצוני ששולט בלוגו ובהתקנה -->
+    <link rel="manifest" href="./manifest.json">
+
+    <!-- לוגו ואייקון מותאם אישית למסך הבית -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%234f46e5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='250' fill='white'>V</text></svg>">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%234f46e5'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='250' fill='white'>V</text></svg>">
-
-    <!-- (PWA Manifest) הגדרות אפליקציה להתקנה -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"המישמות שלנו","short_name":"המישמות","start_url":"./index.html","display":"standalone","background_color":"%23f3f4f6","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 512 512\'><rect width=\'512\' height=\'512\' rx=\'100\' fill=\'\%234f46e5\'/></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
     
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -32,7 +33,7 @@
     <!-- כותרת ותאריך -->
     <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4 relative">
         <span class="absolute top-2 left-3 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v1.0.3</span>
-        <h1 class="text-2xl font-bold text-gray-800 mb-1">המישמות שלנו</h1>
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו</h1>
         <div id="current-date" class="text-xs font-bold text-indigo-600 mb-2"></div>
 
         <!-- מחוון חשבון / קוד משפחתי -->
@@ -44,7 +45,7 @@
             <button onclick="switchUserGroup()" class="text-[10px] text-indigo-600 underline hover:text-indigo-900 mt-1">החלף קוד משפחתי</button>
         </div>
 
-        <!-- כפתור להתקנת האפליקציה בלחיצה אחת -->
+        <!-- כפתור להתקנת האפליקציה בלחיצה אחת מתוך האתר -->
         <div class="mt-3">
             <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2 rounded-xl shadow-sm transition-all items-center justify-center gap-2 mx-auto">
                 📥 התקן את האפליקציה למכשיר
@@ -61,17 +62,35 @@
         <button onclick="closeTodayBanner()" class="text-amber-700 hover:text-amber-900 text-xs font-bold px-2 py-1">✕</button>
     </div>
 
-    <!-- שאר מבנה האפליקציה והלוגיקה שלך תואמים להמשך הקוד הרגיל -->
+    <!-- אזור ניהול משימות והוספה -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+        <div class="flex gap-2 mb-3">
+            <input type="text" id="task-input" placeholder="הוסף משימה חדשה..." class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+            <button onclick="addNewTask()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all">הוסף</button>
+        </div>
+        <div class="flex gap-1 overflow-x-auto pb-1" id="category-filters">
+            <!-- כפתורי סינון קטגוריות -->
+        </div>
+    </div>
+
+    <!-- רשימת המשימות -->
+    <div id="tasks-container" class="space-y-2">
+        <!-- המשימות נטענות דינמית לכאן -->
+    </div>
 
     <script>
-        // רישום Service Worker להתקנת PWA
+        // הצגת תאריך נוכחי
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL', options);
+
+        // רישום Service Worker להפעלת ה-PWA ברקע
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration failed: ', err));
             });
         }
 
-        // ניהול התקנת PWA
+        // ניהול הופעת כפתור ההתקנה מתוך האתר
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -86,7 +105,7 @@
         function installPWA() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
+                deferredPrompt.userChoice.textcore && deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
                         const installBtn = document.getElementById('install-pwa-btn');
                         if (installBtn) installBtn.classList.add('hidden');
@@ -95,6 +114,16 @@
                 });
             }
         }
+
+        function switchUserGroup() {
+            const newGroup = prompt("הכנס קוד משפחתי חדש:");
+            if (newGroup) {
+                localStorage.setItem('user_group', newGroup);
+                location.reload();
+            }
+        }
+
+        document.getElementById('display-group-name').innerText = localStorage.getItem('user_group') || 'משפחה';
     </script>
 </body>
 </html>
