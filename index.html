@@ -46,8 +46,9 @@
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs text-gray-500">קטגוריה ראשית</label>
-            <div class="flex gap-1.5 text-[10px]">
+            <div class="flex gap-1 text-[10px]">
               <button type="button" onclick="openAddModal('category')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
+              <button type="button" onclick="openEditModal('category')" class="text-amber-600 font-bold hover:underline">✏️</button>
               <button type="button" onclick="openDeleteModal('category')" class="text-red-500 font-bold hover:underline">🗑️</button>
             </div>
           </div>
@@ -58,8 +59,9 @@
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs text-gray-500">אחראי/ת</label>
-            <div class="flex gap-1.5 text-[10px]">
+            <div class="flex gap-1 text-[10px]">
               <button type="button" onclick="openAddModal('assignee')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
+              <button type="button" onclick="openEditModal('assignee')" class="text-amber-600 font-bold hover:underline">✏️</button>
               <button type="button" onclick="openDeleteModal('assignee')" class="text-red-500 font-bold hover:underline">🗑️</button>
             </div>
           </div>
@@ -97,8 +99,9 @@
       <div>
         <div class="flex justify-between items-center mb-1">
           <label class="block text-xs text-gray-500">קטגוריה / חנות (רשות)</label>
-          <div class="flex gap-1.5 text-[10px]">
-            <button type="button" onclick="openAddModal('subcategory')" class="text-indigo-600 font-bold hover:underline">+ הוסף קטגוריה</button>
+          <div class="flex gap-1 text-[10px]">
+            <button type="button" onclick="openAddModal('subcategory')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
+            <button type="button" onclick="openEditModal('subcategory')" class="text-amber-600 font-bold hover:underline">✏️</button>
             <button type="button" onclick="openDeleteModal('subcategory')" class="text-red-500 font-bold hover:underline">🗑️</button>
           </div>
         </div>
@@ -143,7 +146,23 @@
     </div>
   </div>
 
-  <!-- מודאל מחיקת פריטים (עם סריקה מורחבת ואפשרות איפוס) -->
+  <!-- מודאל עריכת קטגוריות / אחראים -->
+  <div id="edit-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 id="edit-modal-title" class="text-sm font-bold text-gray-800">עריכת פריטים:</h3>
+        <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
+      </div>
+      
+      <div id="edit-modal-list" class="space-y-2 max-h-60 overflow-y-auto pt-1"></div>
+
+      <div class="flex justify-end pt-2 border-t border-gray-100">
+        <button onclick="closeEditModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">סגור</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- מודאל מחיקה -->
   <div id="delete-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
       <div class="flex justify-between items-center border-b pb-2">
@@ -154,7 +173,7 @@
       <div id="delete-modal-list" class="space-y-1.5 max-h-60 overflow-y-auto pt-1"></div>
 
       <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-        <button onclick="resetAllStorage()" class="text-[11px] font-bold text-red-500 hover:underline">⚠️ איפוס כל הנתונים השמורים</button>
+        <button onclick="resetAllStorage()" class="text-[11px] font-bold text-red-500 hover:underline">⚠️ איפוס כל הנתונים الشמורים</button>
         <button onclick="closeDeleteModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">סגור</button>
       </div>
     </div>
@@ -222,6 +241,7 @@
   let activeSubcategory = 'הכל';
 
   let currentAddType = null;
+  let currentEditType = null;
   let currentDeleteType = null;
 
   const CATEGORY_EMOJIS = ['🛒', '🏠', '⏰', '🧹', '📦', '🚗', '💼', '🍕', '💊', '🛠️', '📌', '⭐', '📝', '🍞', '🥩', '🧼'];
@@ -287,6 +307,7 @@
     }
   }
 
+  /* --- מודאל הוספה --- */
   function openAddModal(type) {
     currentAddType = type;
     const modal = document.getElementById('add-modal');
@@ -373,7 +394,107 @@
     document.getElementById('add-modal').classList.add('hidden');
   }
 
-  /* --- מחיקת פריטים מורחבת (מזהה גם נתונים מגרסאות ישנות) --- */
+  /* --- מודאל עריכת קטגוריות / אחראים --- */
+  function openEditModal(type) {
+    currentEditType = type;
+    const modal = document.getElementById('edit-modal');
+    const list = document.getElementById('edit-modal-list');
+    const title = document.getElementById('edit-modal-title');
+    list.innerHTML = '';
+
+    let itemsSet = new Set();
+
+    if (type === 'category') {
+      title.innerText = '✏️ עריכת קטגוריות ראשיות:';
+      categories.forEach(c => itemsSet.add(c));
+    } else if (type === 'assignee') {
+      title.innerText = '✏️ עריכת אחראים:';
+      assignees.forEach(a => itemsSet.add(a));
+    } else if (type === 'subcategory') {
+      const parentCategory = document.getElementById('task-category').value;
+      title.innerText = `✏️ עריכת קטגוריות משנה (${parentCategory || 'הכל'}):`;
+      subcategories.forEach(s => {
+        if (!parentCategory || s.parentCategory === parentCategory || !s.parentCategory) {
+          itemsSet.add(s.name);
+        }
+      });
+    }
+
+    const items = Array.from(itemsSet);
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="text-xs text-gray-400 p-2 text-center">אין פריטים קיימים לעריכה</div>';
+    } else {
+      items.forEach((oldName, idx) => {
+        const itemRow = document.createElement('div');
+        itemRow.className = 'flex items-center gap-1.5 p-1.5 bg-amber-50/50 rounded-xl border border-amber-100';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = `edit-item-input-${idx}`;
+        input.value = oldName;
+        input.className = 'flex-1 p-1.5 text-xs border border-gray-200 rounded-lg outline-none focus:border-indigo-500 bg-white';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.type = 'button';
+        saveBtn.className = 'bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer';
+        saveBtn.innerText = 'שמור';
+        saveBtn.onclick = () => renameItem(type, oldName, input.value.trim());
+
+        itemRow.appendChild(input);
+        itemRow.appendChild(saveBtn);
+        list.appendChild(itemRow);
+      });
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeEditModal() {
+    document.getElementById('edit-modal').classList.add('hidden');
+    updateCategoryDropdown();
+    updateAssigneeDropdown();
+    updateSubcategoryDropdown();
+  }
+
+  function renameItem(type, oldName, newName) {
+    if (!newName) {
+      alert('נא להזין שם תקין');
+      return;
+    }
+    if (oldName === newName) {
+      alert('לא בוצע שינוי בשם');
+      return;
+    }
+
+    if (type === 'category') {
+      categories = categories.map(c => c === oldName ? newName : c);
+      subcategories = subcategories.map(s => s.parentCategory === oldName ? { ...s, parentCategory: newName } : s);
+      tasks = tasks.map(t => t.category === oldName ? { ...t, category: newName } : t);
+      if (activeCategory === oldName) activeCategory = newName;
+    } else if (type === 'assignee') {
+      assignees = assignees.map(a => a === oldName ? newName : a);
+      tasks = tasks.map(t => t.assignee === oldName ? { ...t, assignee: newName } : t);
+      if (activeAssignee === oldName) activeAssignee = newName;
+    } else if (type === 'subcategory') {
+      subcategories = subcategories.map(s => s.name === oldName ? { ...s, name: newName } : s);
+      tasks = tasks.map(t => t.subcategory === oldName ? { ...t, subcategory: newName } : t);
+      if (activeSubcategory === oldName) activeSubcategory = newName;
+    }
+
+    saveData();
+    updateCategoryDropdown();
+    updateAssigneeDropdown();
+    updateSubcategoryDropdown();
+    renderCategoryFilterBar();
+    renderAssigneeFilterBar();
+    updateSubcategoryFilterBar();
+    render();
+
+    openEditModal(type);
+  }
+
+  /* --- מודאל מחיקת פריטים --- */
   function openDeleteModal(type) {
     currentDeleteType = type;
     const modal = document.getElementById('delete-modal');
@@ -482,10 +603,16 @@
       opt.innerText = c;
       sel.appendChild(opt);
     });
+    
     const addOpt = document.createElement('option');
     addOpt.value = '__ADD_CAT__';
     addOpt.innerText = '➕ הוסף קטגוריה חדשה...';
     sel.appendChild(addOpt);
+
+    const editOpt = document.createElement('option');
+    editOpt.value = '__EDIT_CAT__';
+    editOpt.innerText = '✏️ ערוך קטגוריות...';
+    sel.appendChild(editOpt);
 
     const delOpt = document.createElement('option');
     delOpt.value = '__DEL_CAT__';
@@ -498,6 +625,7 @@
   function onCategorySelectChange() {
     const val = document.getElementById('task-category').value;
     if (val === '__ADD_CAT__') openAddModal('category');
+    else if (val === '__EDIT_CAT__') openEditModal('category');
     else if (val === '__DEL_CAT__') openDeleteModal('category');
     else updateSubcategoryDropdown();
   }
@@ -513,10 +641,16 @@
       opt.innerText = a;
       sel.appendChild(opt);
     });
+    
     const addOpt = document.createElement('option');
     addOpt.value = '__ADD_ASS__';
     addOpt.innerText = '➕ הוסף אחראי/ת...';
     sel.appendChild(addOpt);
+
+    const editOpt = document.createElement('option');
+    editOpt.value = '__EDIT_ASS__';
+    editOpt.innerText = '✏️ ערוך אחראים...';
+    sel.appendChild(editOpt);
 
     const delOpt = document.createElement('option');
     delOpt.value = '__DEL_ASS__';
@@ -529,6 +663,7 @@
   function onAssigneeSelectChange() {
     const val = document.getElementById('task-assignee').value;
     if (val === '__ADD_ASS__') openAddModal('assignee');
+    else if (val === '__EDIT_ASS__') openEditModal('assignee');
     else if (val === '__DEL_ASS__') openDeleteModal('assignee');
   }
 
@@ -550,6 +685,11 @@
     addOpt.innerText = '➕ הוסף קטגוריה חדשה...';
     subSelect.appendChild(addOpt);
 
+    const editOpt = document.createElement('option');
+    editOpt.value = '__EDIT_SUB__';
+    editOpt.innerText = '✏️ ערוך קטגוריות...';
+    subSelect.appendChild(editOpt);
+
     const delOpt = document.createElement('option');
     delOpt.value = '__DEL_SUB__';
     delOpt.innerText = '🗑️ מחק קטגוריה...';
@@ -559,6 +699,7 @@
   function onSubcategorySelectChange() {
     const val = document.getElementById('task-subcategory').value;
     if (val === '__ADD_SUB__') openAddModal('subcategory');
+    else if (val === '__EDIT_SUB__') openEditModal('subcategory');
     else if (val === '__DEL_SUB__') openDeleteModal('subcategory');
   }
 
