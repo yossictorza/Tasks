@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>המשימות שלנו v1.0.6</title>
+  <title>המשימות שלנו v1.0.7</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
 
-  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=6","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27300%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=7","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27300%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
   
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -30,17 +30,18 @@
 
   <!-- כותרת ראשית -->
   <header class="bg-white rounded-3xl p-5 shadow-xs border border-slate-200/60 text-center mb-4 relative">
-    <span class="absolute top-3 left-3 text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">v1.0.6</span>
+    <span class="absolute top-3 left-3 text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">v1.0.7</span>
     <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-1">המשימות שלנו 📋</h1>
     <div id="current-date" class="text-xs font-bold text-slate-500 mb-3"></div>
     
-    <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200/80 text-slate-700 text-xs px-4 py-1.5 rounded-full font-bold shadow-2xs">
+    <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200/80 text-slate-700 text-xs px-4 py-1.5 rounded-full font-bold shadow-2xs mb-3">
       <span>🔑 חשבון: <strong id="display-group-name" class="text-indigo-600">...</strong></span>
       <button onclick="switchUserGroup()" class="text-[11px] text-indigo-600 hover:text-indigo-800 underline font-extrabold transition mr-1">החלף</button>
     </div>
 
-    <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-sm transition flex items-center justify-center gap-2 mx-auto w-full cursor-pointer mt-3">
-      📲 התקן את האפליקציה למכשיר
+    <!-- כפתור התקנה תמידי בראש העמוד -->
+    <button onclick="installPWA()" class="bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-extrabold px-4 py-3 rounded-2xl shadow-sm transition flex items-center justify-center gap-2 mx-auto w-full cursor-pointer">
+      📲 הוסף את האפליקציה למסך הבית
     </button>
   </header>
 
@@ -55,7 +56,7 @@
     <div id="today-tasks-list" class="space-y-2"></div>
   </div>
 
-  <!-- טופס הוספת משימה (מעוצב מחדש לבהירות מרבית) -->
+  <!-- טופס הוספת משימה -->
   <section class="bg-white rounded-3xl p-5 shadow-xs border border-slate-200/60 mb-4">
     <h2 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
       <span>➕</span> הוספת משימה חדשה
@@ -68,7 +69,6 @@
       </div>
       
       <div class="grid grid-cols-2 gap-3">
-        <!-- קטגוריה ראשית -->
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="block text-[11px] font-bold text-slate-600">קטגוריה ראשית</label>
@@ -81,7 +81,6 @@
           <select id="task-category" onchange="onCategorySelectChange()" class="w-full p-3 border border-slate-200 rounded-2xl bg-slate-50/50 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500"></select>
         </div>
 
-        <!-- אחראי/ת -->
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="block text-[11px] font-bold text-slate-600">אחראי/ת</label>
@@ -95,7 +94,6 @@
         </div>
       </div>
 
-      <!-- קטגוריה / חנות משנה -->
       <div>
         <div class="flex justify-between items-center mb-1">
           <label class="block text-[11px] font-bold text-slate-600">קטגוריה משנה / חנות <span class="text-slate-400 font-normal">(רשות)</span></label>
@@ -108,7 +106,6 @@
         <select id="task-subcategory" onchange="onSubcategorySelectChange()" class="w-full p-3 border border-slate-200 rounded-2xl bg-slate-50/50 text-xs font-bold text-slate-700 outline-none focus:border-indigo-500"></select>
       </div>
 
-      <!-- מתג הפעלת תאריך עברי -->
       <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-3">
         <label class="flex items-center justify-between cursor-pointer">
           <span class="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
@@ -117,7 +114,6 @@
           <input type="checkbox" id="task-enable-date" onchange="onDateSwitchChange()" class="w-4 h-4 text-indigo-600 rounded-md cursor-pointer accent-indigo-600">
         </label>
 
-        <!-- בחירת תאריך עברי -->
         <div id="task-date-picker-box" class="hidden grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/70">
           <div>
             <label class="block text-[10px] font-bold text-slate-400 mb-1">יום</label>
@@ -140,23 +136,20 @@
     </div>
   </section>
 
-  <!-- סרגלי סינון מעוצבים ונקיים -->
+  <!-- סרגלי סינון -->
   <div class="bg-white rounded-3xl p-3.5 shadow-xs border border-slate-200/60 mb-4 space-y-3">
     <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">סינון משימות</div>
     
-    <!-- סינון קטגוריות ראשיות -->
     <div>
       <div class="text-[10px] font-bold text-slate-500 mb-1.5">קטגוריה ראשית:</div>
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar" id="category-filter-bar"></div>
     </div>
 
-    <!-- סינון אחראים -->
     <div class="pt-2 border-t border-slate-100">
       <div class="text-[10px] font-bold text-slate-500 mb-1.5">אחראי/ת:</div>
       <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar" id="assignee-filter-bar"></div>
     </div>
 
-    <!-- סינון תת-קטגוריה -->
     <div id="subcategory-filter-bar" class="hidden pt-2 border-t border-slate-100">
       <div class="text-[10px] font-bold text-slate-500 mb-1.5">תת-קטגוריה / חנות:</div>
       <div id="subcategory-filter-buttons" class="flex gap-1.5 overflow-x-auto no-scrollbar"></div>
@@ -165,6 +158,16 @@
 
   <!-- רשימת המשימות -->
   <main id="tasks-container" class="space-y-3"></main>
+
+  <!-- מודאל הדרכה להתקנה (במיוחד לאייפון / דפדפנים שלא תומכים בהתקנה אוטומטית) -->
+  <div id="install-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-xl space-y-4 text-center">
+      <div class="text-3xl">📲</div>
+      <h3 class="text-base font-extrabold text-slate-900">הוספה למסך הבית</h3>
+      <p id="install-instructions-text" class="text-xs text-slate-600 leading-relaxed font-medium"></p>
+      <button onclick="closeInstallModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 rounded-2xl text-xs transition cursor-pointer">הבנתי, תודה!</button>
+    </div>
+  </div>
 
   <!-- מודאל הוספה -->
   <div id="add-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
@@ -219,31 +222,39 @@
 
 <script>
   let deferredPrompt;
-  const installBtn = document.getElementById('install-pwa-btn');
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    if (installBtn) installBtn.classList.remove('hidden');
   });
 
   async function installPWA() {
-    if (!deferredPrompt) {
-      alert("להורדה למסך הבית במכשיר זה:\nלחץ על כפתור השיתוף/האפשרויות בדפדפן ובחר 'הוסף למסך הבית'.");
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        deferredPrompt = null;
+      }
       return;
     }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      if (installBtn) installBtn.classList.add('hidden');
+
+    // זיהוי מכשיר פשוט לצורך מתן הנחיות מדויקות
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const modal = document.getElementById('install-modal');
+    const textElem = document.getElementById('install-install-instructions-text') || document.getElementById('install-instructions-text');
+
+    if (isIOS) {
+      textElem.innerHTML = 'כדי להוסיף את האפליקציה למסך הבית באייפון:<br><br>1. לחץ על כפתור <b>השתוף (Share)</b> בתחתית דפדפן ספארי.<br>2. גלול בתפריט ובחר <b>"הוסף למסך הבית" (Add to Home Screen)</b>.<br>3. לחץ על <b>"הוסף"</b> בפינה השמאלית העליונה.';
+    } else {
+      textElem.innerHTML = 'כדי להוסיף את האפליקציה למסך הבית במכשיר זה:<br><br>1. לחץ על כפתור <b>תפריט 3 הנקודות</b> בפינה העליונה של הדפדפן.<br>2. בחר באפשרות <b>"הוסף למסך הבית"</b> או <b>"התקן אפליקציה"</b>.';
     }
-    deferredPrompt = null;
+    modal.classList.remove('hidden');
   }
 
-  window.addEventListener('appinstalled', () => {
-    if (installBtn) installBtn.classList.add('hidden');
-    deferredPrompt = null;
-  });
+  function closeInstallModal() {
+    document.getElementById('install-modal').classList.add('hidden');
+  }
 
   const firebaseConfig = {
     apiKey: "AIzaSyDLs89sfyIr-6aBT4A_OcXOVhLLeauWOR0",
