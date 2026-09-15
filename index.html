@@ -17,11 +17,22 @@
 </head>
 <body class="max-w-md mx-auto p-4 min-h-screen pb-20">
 
-  <!-- כותרת -->
+  <!-- כותרת ותאריך -->
   <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4">
     <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו 📋</h1>
     <div id="current-date" class="text-xs font-bold text-indigo-600"></div>
   </header>
+
+  <!-- באנר משימות להיום (מופיע אוטומטית כשיש משימה של היום) -->
+  <div id="today-banner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-4 shadow-sm">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-xs font-bold text-amber-900 flex items-center gap-1">
+        ⭐ משימות להיום (<span id="today-count">0</span>)
+      </span>
+      <span class="text-[10px] text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full font-bold">היום</span>
+    </div>
+    <div id="today-tasks-list" class="space-y-1.5"></div>
+  </div>
 
   <!-- טופס הוספת משימה -->
   <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
@@ -49,17 +60,23 @@
         </div>
       </div>
 
-      <!-- שדה תאריך עברי אופציונלי -->
-      <div>
-        <label class="block text-xs text-gray-500 mb-1">תאריך עברי / הערת זמן (אופציונלי)</label>
-        <input type="text" id="task-hebrew-date" placeholder="למשל: כ&quot;ה בתשרי / ערב חג" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
+      <!-- שדות תאריך -->
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">תאריך יעד (למיון)</label>
+          <input type="date" id="task-due-date" class="w-full p-2 border border-gray-200 rounded-xl text-sm bg-white">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">תאריך עברי / הערה</label>
+          <input type="text" id="task-hebrew-date" placeholder="למשל: כ&quot;ה בתשרי" class="w-full p-2 border border-gray-200 rounded-xl text-sm outline-none">
+        </div>
       </div>
 
-      <!-- בחירת תת-קטגוריה / חנות -->
+      <!-- תת-קטגוריה -->
       <div>
         <div class="flex justify-between items-center mb-1">
           <label class="block text-xs text-gray-500">תת-קטגוריה / חנות (רשות)</label>
-          <button type="button" onclick="promptNewSubcategory()" class="text-[11px] text-indigo-600 font-bold hover:underline">+ צור תת-קטגוריה חדשה</button>
+          <button type="button" onclick="promptNewSubcategory()" class="text-[11px] text-indigo-600 font-bold hover:underline">+ צור תת-קטגוריה</button>
         </div>
         <select id="task-subcategory" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
           <option value="כללי">כללי (ללא תת-קטגוריה)</option>
@@ -74,9 +91,10 @@
 
   <!-- סרגלי סינון -->
   <div class="space-y-2 mb-4">
-    <!-- סינון קטגוריה ראשי -->
+    <!-- סינון קטגוריה ראשי + לשונית "עם תאריך" -->
     <div class="flex gap-1.5 overflow-x-auto pb-1">
       <button onclick="setCategoryFilter('הכל', this)" class="cat-filter-btn active bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm whitespace-nowrap">הכל</button>
+      <button onclick="setCategoryFilter('📅 עם תאריך', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">📅 עם תאריך</button>
       <button onclick="setCategoryFilter('קניות', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🛒 קניות</button>
       <button onclick="setCategoryFilter('מטלות בית', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🏠 מטלות בית</button>
       <button onclick="setCategoryFilter('תזכורות', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">⏰ תזכורות</button>
@@ -96,19 +114,33 @@
   <main id="tasks-container" class="space-y-3"></main>
 
 <script>
-  // טעינת נתונים שמורים מהמכשיר
   let tasks = JSON.parse(localStorage.getItem('app_tasks')) || [];
   let subcategories = JSON.parse(localStorage.getItem('app_subcategories')) || [];
   let activeCategory = 'הכל';
   let activeAssignee = 'הכל';
 
-  // שמירה קבועה במכשיר
   function saveData() {
     localStorage.setItem('app_tasks', JSON.stringify(tasks));
     localStorage.setItem('app_subcategories', JSON.stringify(subcategories));
   }
 
-  // הצגת תאריך לועזי ועברי בכותרת
+  function getTodayStr() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function formatDateForDisplay(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+  }
+
   try {
     const today = new Date();
     const gregDate = today.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -152,7 +184,7 @@
   }
 
   function deleteSubcategory(subId, subName, parentCat) {
-    if (confirm(`האם למחוק את תת-הקטגוריה "${subName}"? כל המשימות בתוכה יימחקו אוטומטית!`)) {
+    if (confirm(`האם למחוק את תת-הקטגוריה "${subName}"? כל המשימות בתוכה יימחקו!`)) {
       subcategories = subcategories.filter(s => s.id !== subId);
       tasks = tasks.filter(t => !(t.category === parentCat && t.subcategory === subName));
       saveData();
@@ -166,6 +198,7 @@
     const category = document.getElementById('task-category').value;
     const assignee = document.getElementById('task-assignee').value;
     const subcategory = document.getElementById('task-subcategory').value;
+    const dueDate = document.getElementById('task-due-date').value;
     const hebrewDate = document.getElementById('task-hebrew-date').value.trim();
 
     if (!title) return alert('נא להזין תיאור משימה');
@@ -176,12 +209,14 @@
       category,
       assignee,
       subcategory,
+      dueDate: dueDate || null,
       hebrewDate: hebrewDate || null,
       completed: false
     });
 
     saveData();
     document.getElementById('task-title').value = '';
+    document.getElementById('task-due-date').value = '';
     document.getElementById('task-hebrew-date').value = '';
     render();
   }
@@ -228,6 +263,7 @@
   function saveEdit(id) {
     const newTitle = document.getElementById(`edit-title-${id}`).value.trim();
     const newAssignee = document.getElementById(`edit-assignee-${id}`).value;
+    const newDueDate = document.getElementById(`edit-due-date-${id}`).value;
     const newHebrewDate = document.getElementById(`edit-hebrew-date-${id}`).value.trim();
 
     if (!newTitle) return;
@@ -236,6 +272,7 @@
       ...t,
       title: newTitle,
       assignee: newAssignee,
+      dueDate: newDueDate || null,
       hebrewDate: newHebrewDate || null,
       isEditing: false
     } : t);
@@ -244,15 +281,69 @@
     render();
   }
 
+  function sortTasks(taskList) {
+    return taskList.sort((a, b) => {
+      if (a.dueDate && b.dueDate) {
+        return a.dueDate.localeCompare(b.dueDate);
+      }
+      if (a.dueDate && !b.dueDate) return -1;
+      if (!a.dueDate && b.dueDate) return 1;
+      return 0;
+    });
+  }
+
+  function updateTodayBanner() {
+    const todayStr = getTodayStr();
+    const todayBanner = document.getElementById('today-banner');
+    const todayList = document.getElementById('today-tasks-list');
+    const todayCount = document.getElementById('today-count');
+
+    const todayTasks = tasks.filter(t => t.dueDate === todayStr && !t.completed);
+
+    if (todayTasks.length === 0) {
+      todayBanner.classList.add('hidden');
+      return;
+    }
+
+    todayBanner.classList.remove('hidden');
+    todayCount.innerText = todayTasks.length;
+    todayList.innerHTML = '';
+
+    todayTasks.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'flex items-center justify-between text-xs font-semibold text-amber-900 bg-white/70 p-2 rounded-lg border border-amber-200/50';
+      item.innerHTML = `
+        <div class="flex items-center gap-2">
+          <input type="checkbox" onclick="toggleTask('${t.id}')" class="w-3.5 h-3.5 text-amber-600 rounded">
+          <span>${t.title}</span>
+        </div>
+        <span class="text-[10px] bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded font-bold">${t.assignee}</span>
+      `;
+      todayList.appendChild(item);
+    });
+  }
+
   function render() {
+    updateTodayBanner();
+
     const container = document.getElementById('tasks-container');
     container.innerHTML = '';
 
     let filtered = tasks.filter(t => {
-      const matchCat = activeCategory === 'הכל' || t.category === activeCategory;
+      let matchCat = false;
+      if (activeCategory === 'הכל') {
+        matchCat = true;
+      } else if (activeCategory === '📅 עם תאריך') {
+        matchCat = !!t.dueDate;
+      } else {
+        matchCat = t.category === activeCategory;
+      }
+
       const matchAss = activeAssignee === 'הכל' || t.assignee === activeAssignee;
       return matchCat && matchAss;
     });
+
+    filtered = sortTasks(filtered);
 
     if (filtered.length === 0) {
       container.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">אין משימות להצגה</div>';
@@ -261,7 +352,7 @@
 
     const generalTasks = filtered.filter(t => !t.subcategory || t.subcategory === 'כללי');
     if (generalTasks.length > 0) {
-      if (activeCategory !== 'הכל') {
+      if (activeCategory !== 'הכל' && activeCategory !== '📅 עם תאריך') {
         const genHeader = document.createElement('div');
         genHeader.className = 'text-xs font-bold text-gray-500 mb-1 px-1';
         genHeader.innerText = '📌 משימות כלליות';
@@ -299,18 +390,21 @@
 
   function createTaskCard(task) {
     const card = document.createElement('div');
-    card.className = `bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between mb-1.5 ${task.completed ? 'opacity-50' : ''}`;
+    const isToday = task.dueDate === getTodayStr();
+    
+    card.className = `bg-white p-3 rounded-xl shadow-sm border ${isToday ? 'border-amber-400 bg-amber-50/30' : 'border-gray-100'} flex items-center justify-between mb-1.5 ${task.completed ? 'opacity-50' : ''}`;
 
     if (task.isEditing) {
       card.innerHTML = `
         <div class="w-full space-y-2">
           <input type="text" id="edit-title-${task.id}" value="${task.title}" class="w-full p-1.5 border rounded-lg text-sm">
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-3 gap-1.5">
             <select id="edit-assignee-${task.id}" class="p-1 border rounded-lg text-xs">
               <option value="שנינו" ${task.assignee === 'שנינו' ? 'selected' : ''}>שנינו</option>
               <option value="יוסי" ${task.assignee === 'יוסי' ? 'selected' : ''}>יוסי</option>
               <option value="אסתי" ${task.assignee === 'אסתי' ? 'selected' : ''}>אסתי</option>
             </select>
+            <input type="date" id="edit-due-date-${task.id}" value="${task.dueDate || ''}" class="p-1 border rounded-lg text-xs">
             <input type="text" id="edit-hebrew-date-${task.id}" value="${task.hebrewDate || ''}" placeholder="תאריך עברי" class="p-1 border rounded-lg text-xs">
           </div>
           <button onclick="saveEdit('${task.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold">שמור</button>
@@ -328,8 +422,9 @@
             <span class="text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'} font-medium block">${task.title}</span>
             <div class="flex gap-1 mt-0.5 flex-wrap">
               <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}">${task.assignee}</span>
-              ${activeCategory === 'הכל' ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-bold">🏷️ ${task.category}</span>` : ''}
-              ${task.hebrewDate ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-bold">📅 ${task.hebrewDate}</span>` : ''}
+              ${activeCategory === 'הכל' || activeCategory === '📅 עם תאריך' ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-bold">🏷️ ${task.category}</span>` : ''}
+              ${task.dueDate ? `<span class="text-[10px] px-2 py-0.5 rounded-full ${isToday ? 'bg-amber-100 text-amber-800 font-extrabold border border-amber-300' : 'bg-blue-50 text-blue-700 border border-blue-200'} font-bold">📅 ${formatDateForDisplay(task.dueDate)}</span>` : ''}
+              ${task.hebrewDate ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-bold">📜 ${task.hebrewDate}</span>` : ''}
             </div>
           </div>
         </div>
