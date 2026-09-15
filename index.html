@@ -11,6 +11,11 @@
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
   
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background-color: #f3f4f6; }
   </style>
@@ -20,7 +25,13 @@
   <!-- כותרת ותאריך -->
   <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4">
     <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו 📋</h1>
-    <div id="current-date" class="text-xs font-bold text-indigo-600"></div>
+    <div id="current-date" class="text-xs font-bold text-indigo-600 mb-2"></div>
+    
+    <!-- מחוון חשבון / קוד משפחתי -->
+    <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-800 text-xs px-3 py-1 rounded-full font-bold">
+      <span>🔑 חשבון: <strong id="display-group-name">...</strong></span>
+      <button onclick="switchUserGroup()" class="text-[10px] text-indigo-600 underline hover:text-indigo-900">החלף</button>
+    </div>
   </header>
 
   <!-- באנר משימות להיום -->
@@ -172,14 +183,54 @@
       
       <div id="delete-modal-list" class="space-y-1.5 max-h-60 overflow-y-auto pt-1"></div>
 
-      <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-        <button onclick="resetAllStorage()" class="text-[11px] font-bold text-red-500 hover:underline">⚠️ איפוס כל הנתונים الشמורים</button>
+      <div class="flex justify-end pt-2 border-t border-gray-100">
         <button onclick="closeDeleteModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">סגור</button>
       </div>
     </div>
   </div>
 
 <script>
+  // הגדרות Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLs89sfyIr-6aBT4A_OcXOVhLLeauWOR0",
+    authDomain: "my-tasks-app-3e4da.firebaseapp.com",
+    projectId: "my-tasks-app-3e4da",
+    storageBucket: "my-tasks-app-3e4da.firebasestorage.app",
+    messagingSenderId: "1002745919988",
+    appId: "1:1002745919988:web:6ecf90c2bacab4ee5e61a1"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // ניהול קוד משפחתי / שם משתמש
+  let userGroup = localStorage.getItem('app_userGroup');
+
+  function checkUserGroup() {
+    if (!userGroup) {
+      userGroup = prompt("הכנס שם משתמש / קוד משפחתי (למשל: ctorza):");
+      if (userGroup) {
+        userGroup = userGroup.trim().toLowerCase();
+        localStorage.setItem('app_userGroup', userGroup);
+      } else {
+        userGroup = "default";
+      }
+    }
+    document.getElementById('display-group-name').innerText = userGroup;
+  }
+
+  function switchUserGroup() {
+    const newGroup = prompt("הכנס קוד משפחתי חדש להתחברות:", userGroup);
+    if (newGroup && newGroup.trim() !== "") {
+      userGroup = newGroup.trim().toLowerCase();
+      localStorage.setItem('app_userGroup', userGroup);
+      document.getElementById('display-group-name').innerText = userGroup;
+      listenToCloudData();
+    }
+  }
+
+  checkUserGroup();
+
   const HEBREW_DAYS_LIST = [
     "", "א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ז'", "ח'", "ט'", "י'",
     'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט', "כ'",
@@ -225,16 +276,10 @@
 
   const todayHeb = getTodayHebrewData();
 
-  let categories = JSON.parse(localStorage.getItem('app_categories')) || ['🛒 קניות', '🏠 מטלות בית', '⏰ תזכורות'];
-  let assignees = JSON.parse(localStorage.getItem('app_assignees')) || ['👫 שנינו', '👨 יוסי', '👩 אסתי'];
-  let subcategories = JSON.parse(localStorage.getItem('app_subcategories')) || [];
-
-  let rawTasks = JSON.parse(localStorage.getItem('app_tasks')) || [];
-  let tasks = rawTasks.map(t => ({
-    ...t,
-    hebrewDateDisplay: t.hebrewDateDisplay || t.hebrewDate || null,
-    hebrewSortKey: t.hebrewSortKey || null
-  }));
+  let categories = ['🛒 קניות', '🏠 מטלות בית', '⏰ תזכורות'];
+  let assignees = ['👫 שנינו', '👨 יוסי', '👩 אסתי'];
+  let subcategories = [];
+  let tasks = [];
 
   let activeCategory = 'הכל';
   let activeAssignee = 'הכל';
@@ -244,14 +289,43 @@
   let currentEditType = null;
   let currentDeleteType = null;
 
+  let unsubscribeListener = null;
+
   const CATEGORY_EMOJIS = ['🛒', '🏠', '⏰', '🧹', '📦', '🚗', '💼', '🍕', '💊', '🛠️', '📌', '⭐', '📝', '🍞', '🥩', '🧼'];
   const ASSIGNEE_EMOJIS = ['👨', '👩', '👫', '👤', '🧑', '👧', '👦', '👵', '👴', '⭐'];
 
-  function saveData() {
-    localStorage.setItem('app_categories', JSON.stringify(categories));
-    localStorage.setItem('app_assignees', JSON.stringify(assignees));
-    localStorage.setItem('app_subcategories', JSON.stringify(subcategories));
-    localStorage.setItem('app_tasks', JSON.stringify(tasks));
+  // סנכרון מול Cloud Firestore
+  function listenToCloudData() {
+    if (unsubscribeListener) unsubscribeListener();
+
+    unsubscribeListener = db.collection('user_groups').doc(userGroup).onSnapshot(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        categories = data.categories || ['🛒 קניות', '🏠 מטלות בית', '⏰ תזכורות'];
+        assignees = data.assignees || ['👫 שנינו', '👨 יוסי', '👩 אסתי'];
+        subcategories = data.subcategories || [];
+        tasks = data.tasks || [];
+      } else {
+        saveDataCloud();
+      }
+
+      updateCategoryDropdown();
+      updateAssigneeDropdown();
+      updateSubcategoryDropdown();
+      renderCategoryFilterBar();
+      renderAssigneeFilterBar();
+      updateSubcategoryFilterBar();
+      render();
+    });
+  }
+
+  function saveDataCloud() {
+    db.collection('user_groups').doc(userGroup).set({
+      categories: categories,
+      assignees: assignees,
+      subcategories: subcategories,
+      tasks: tasks
+    }, { merge: true });
   }
 
   const gregDate = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -355,46 +429,28 @@
 
   function confirmAddModal() {
     const val = document.getElementById('add-modal-input').value.trim();
-    if (!val) {
-      alert('נא להזין שם');
-      return;
-    }
+    if (!val) return alert('נא להזין שם');
 
     if (currentAddType === 'category') {
       if (!categories.includes(val)) {
         categories.push(val);
-        saveData();
+        saveDataCloud();
       }
-      updateCategoryDropdown();
-      document.getElementById('task-category').value = val;
-      renderCategoryFilterBar();
-      updateSubcategoryDropdown();
     } else if (currentAddType === 'assignee') {
       if (!assignees.includes(val)) {
         assignees.push(val);
-        saveData();
+        saveDataCloud();
       }
-      updateAssigneeDropdown();
-      document.getElementById('task-assignee').value = val;
-      renderAssigneeFilterBar();
     } else if (currentAddType === 'subcategory') {
       const parentCategory = document.getElementById('task-category').value;
-      subcategories.push({
-        id: Date.now().toString(),
-        name: val,
-        parentCategory: parentCategory
-      });
-      saveData();
-      updateSubcategoryDropdown();
-      document.getElementById('task-subcategory').value = val;
-      updateSubcategoryFilterBar();
-      render();
+      subcategories.push({ id: Date.now().toString(), name: val, parentCategory: parentCategory });
+      saveDataCloud();
     }
 
     document.getElementById('add-modal').classList.add('hidden');
   }
 
-  /* --- מודאל עריכת קטגוריות / אחראים --- */
+  /* --- מודאל עריכה --- */
   function openEditModal(type) {
     currentEditType = type;
     const modal = document.getElementById('edit-modal');
@@ -452,20 +508,11 @@
 
   function closeEditModal() {
     document.getElementById('edit-modal').classList.add('hidden');
-    updateCategoryDropdown();
-    updateAssigneeDropdown();
-    updateSubcategoryDropdown();
   }
 
   function renameItem(type, oldName, newName) {
-    if (!newName) {
-      alert('נא להזין שם תקין');
-      return;
-    }
-    if (oldName === newName) {
-      alert('לא בוצע שינוי בשם');
-      return;
-    }
+    if (!newName) return alert('נא להזין שם תקין');
+    if (oldName === newName) return alert('לא בוצע שינוי בשם');
 
     if (type === 'category') {
       categories = categories.map(c => c === oldName ? newName : c);
@@ -482,19 +529,11 @@
       if (activeSubcategory === oldName) activeSubcategory = newName;
     }
 
-    saveData();
-    updateCategoryDropdown();
-    updateAssigneeDropdown();
-    updateSubcategoryDropdown();
-    renderCategoryFilterBar();
-    renderAssigneeFilterBar();
-    updateSubcategoryFilterBar();
-    render();
-
+    saveDataCloud();
     openEditModal(type);
   }
 
-  /* --- מודאל מחיקת פריטים --- */
+  /* --- מודאל מחיקה --- */
   function openDeleteModal(type) {
     currentDeleteType = type;
     const modal = document.getElementById('delete-modal');
@@ -507,25 +546,15 @@
     if (type === 'category') {
       title.innerText = 'לחץ על קטגוריה ראשית למחיקה:';
       categories.forEach(c => itemsSet.add(c));
-      tasks.forEach(t => { if (t.category) itemsSet.add(t.category); });
     } else if (type === 'assignee') {
       title.innerText = 'לחץ על אחראי/ת למחיקה:';
       assignees.forEach(a => itemsSet.add(a));
-      tasks.forEach(t => { if (t.assignee) itemsSet.add(t.assignee); });
     } else if (type === 'subcategory') {
       const parentCategory = document.getElementById('task-category').value;
       title.innerText = `לחץ על קטגוריה למחיקה:`;
-      
       subcategories.forEach(s => {
         if (!parentCategory || s.parentCategory === parentCategory || !s.parentCategory) {
           itemsSet.add(s.name);
-        }
-      });
-      tasks.forEach(t => {
-        if (t.subcategory && t.subcategory !== 'כללי') {
-          if (!parentCategory || t.category === parentCategory) {
-            itemsSet.add(t.subcategory);
-          }
         }
       });
     }
@@ -550,9 +579,6 @@
 
   function closeDeleteModal() {
     document.getElementById('delete-modal').classList.add('hidden');
-    updateCategoryDropdown();
-    updateAssigneeDropdown();
-    updateSubcategoryDropdown();
   }
 
   function deleteItemFromModal(type, itemName) {
@@ -572,23 +598,8 @@
         if (activeSubcategory === itemName) activeSubcategory = 'הכל';
       }
 
-      saveData();
-      updateCategoryDropdown();
-      updateAssigneeDropdown();
-      updateSubcategoryDropdown();
-      renderCategoryFilterBar();
-      renderAssigneeFilterBar();
-      updateSubcategoryFilterBar();
-      render();
-
+      saveDataCloud();
       openDeleteModal(type);
-    }
-  }
-
-  function resetAllStorage() {
-    if (confirm('אזהרה: פעולה זו תאפס את כל הקטגוריות והמשימות בחזרה לגרסת הברירת מחדל. להמשיך?')) {
-      localStorage.clear();
-      location.reload();
     }
   }
 
@@ -604,20 +615,9 @@
       sel.appendChild(opt);
     });
     
-    const addOpt = document.createElement('option');
-    addOpt.value = '__ADD_CAT__';
-    addOpt.innerText = '➕ הוסף קטגוריה חדשה...';
-    sel.appendChild(addOpt);
-
-    const editOpt = document.createElement('option');
-    editOpt.value = '__EDIT_CAT__';
-    editOpt.innerText = '✏️ ערוך קטגוריות...';
-    sel.appendChild(editOpt);
-
-    const delOpt = document.createElement('option');
-    delOpt.value = '__DEL_CAT__';
-    delOpt.innerText = '🗑️ מחק קטגוריה...';
-    sel.appendChild(delOpt);
+    sel.appendChild(new Option('➕ הוסף קטגוריה חדשה...', '__ADD_CAT__'));
+    sel.appendChild(new Option('✏️ ערוך קטגוריות...', '__EDIT_CAT__'));
+    sel.appendChild(new Option('🗑️ מחק קטגוריה...', '__DEL_CAT__'));
 
     if (categories.includes(curVal)) sel.value = curVal;
   }
@@ -642,20 +642,9 @@
       sel.appendChild(opt);
     });
     
-    const addOpt = document.createElement('option');
-    addOpt.value = '__ADD_ASS__';
-    addOpt.innerText = '➕ הוסף אחראי/ת...';
-    sel.appendChild(addOpt);
-
-    const editOpt = document.createElement('option');
-    editOpt.value = '__EDIT_ASS__';
-    editOpt.innerText = '✏️ ערוך אחראים...';
-    sel.appendChild(editOpt);
-
-    const delOpt = document.createElement('option');
-    delOpt.value = '__DEL_ASS__';
-    delOpt.innerText = '🗑️ מחק אחראי/ת...';
-    sel.appendChild(delOpt);
+    sel.appendChild(new Option('➕ הוסף אחראי/ת...', '__ADD_ASS__'));
+    sel.appendChild(new Option('✏️ ערוך אחראים...', '__EDIT_ASS__'));
+    sel.appendChild(new Option('🗑️ מחק אחראי/ת...', '__DEL_ASS__'));
 
     if (assignees.includes(curVal)) sel.value = curVal;
   }
@@ -674,26 +663,12 @@
 
     const filteredSubs = subcategories.filter(s => s.parentCategory === selectedCat);
     filteredSubs.forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s.name;
-      opt.innerText = s.name;
-      subSelect.appendChild(opt);
+      subSelect.appendChild(new Option(s.name, s.name));
     });
 
-    const addOpt = document.createElement('option');
-    addOpt.value = '__ADD_SUB__';
-    addOpt.innerText = '➕ הוסף קטגוריה חדשה...';
-    subSelect.appendChild(addOpt);
-
-    const editOpt = document.createElement('option');
-    editOpt.value = '__EDIT_SUB__';
-    editOpt.innerText = '✏️ ערוך קטגוריות...';
-    subSelect.appendChild(editOpt);
-
-    const delOpt = document.createElement('option');
-    delOpt.value = '__DEL_SUB__';
-    delOpt.innerText = '🗑️ מחק קטגוריה...';
-    subSelect.appendChild(delOpt);
+    subSelect.appendChild(new Option('➕ הוסף קטגוריה חדשה...', '__ADD_SUB__'));
+    subSelect.appendChild(new Option('✏️ ערוך קטגוריות...', '__EDIT_SUB__'));
+    subSelect.appendChild(new Option('🗑️ מחק קטגוריה...', '__DEL_SUB__'));
   }
 
   function onSubcategorySelectChange() {
@@ -708,11 +683,11 @@
     if (!bar) return;
     bar.innerHTML = '';
 
-    bar.appendChild(createFilterButton('הכל', activeCategory === 'הכל', (btn) => setCategoryFilter('הכל', btn)));
-    bar.appendChild(createFilterButton('📅 עם תאריך', activeCategory === '📅 עם תאריך', (btn) => setCategoryFilter('📅 עם תאריך', btn)));
+    bar.appendChild(createFilterButton('הכל', activeCategory === 'הכל', () => setCategoryFilter('הכל')));
+    bar.appendChild(createFilterButton('📅 עם תאריך', activeCategory === '📅 עם תאריך', () => setCategoryFilter('📅 עם תאריך')));
 
     categories.forEach(c => {
-      bar.appendChild(createFilterButton(c, activeCategory === c, (b) => setCategoryFilter(c, b)));
+      bar.appendChild(createFilterButton(c, activeCategory === c, () => setCategoryFilter(c)));
     });
   }
 
@@ -726,10 +701,10 @@
     label.innerText = 'אחראי:';
     bar.appendChild(label);
 
-    bar.appendChild(createFilterButton('הכל', activeAssignee === 'הכל', (btn) => setAssigneeFilter('הכל', btn), 'ass'));
+    bar.appendChild(createFilterButton('הכל', activeAssignee === 'הכל', () => setAssigneeFilter('הכל'), 'ass'));
 
     assignees.forEach(a => {
-      bar.appendChild(createFilterButton(a, activeAssignee === a, (b) => setAssigneeFilter(a, b), 'ass'));
+      bar.appendChild(createFilterButton(a, activeAssignee === a, () => setAssigneeFilter(a), 'ass'));
     });
   }
 
@@ -774,13 +749,13 @@
     let activeClasses = 'bg-indigo-600 text-white shadow-sm';
     if (type === 'ass') activeClasses = 'bg-gray-700 text-white';
 
-    btn.className = `${type}-filter-btn ${isActive ? activeClasses : 'bg-white text-gray-600 border border-gray-200'} px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer`;
+    btn.className = `${isActive ? activeClasses : 'bg-white text-gray-600 border border-gray-200'} px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer`;
     btn.innerText = text;
-    btn.onclick = () => onClick(btn);
+    btn.onclick = onClick;
     return btn;
   }
 
-  function setCategoryFilter(cat, btn) {
+  function setCategoryFilter(cat) {
     activeCategory = cat;
     activeSubcategory = 'הכל';
     renderCategoryFilterBar();
@@ -788,7 +763,7 @@
     render();
   }
 
-  function setAssigneeFilter(ass, btn) {
+  function setAssigneeFilter(ass) {
     activeAssignee = ass;
     renderAssigneeFilterBar();
     render();
@@ -815,26 +790,29 @@
       hebSortKey = Math.floor(yearVal * 10000 + monthVal * 100 + dayVal);
     }
 
-    tasks.push({ id: Date.now().toString(), title, category, assignee, subcategory, hebrewDateDisplay: hebDateDisplay, hebrewSortKey: hebSortKey, hebDay: dayVal, hebMonth: monthVal, hebYear: yearVal, completed: false });
+    tasks.push({
+      id: Date.now().toString(),
+      title, category, assignee, subcategory,
+      hebrewDateDisplay: hebDateDisplay,
+      hebrewSortKey: hebSortKey,
+      hebDay: dayVal, hebMonth: monthVal, hebYear: yearVal,
+      completed: false
+    });
 
-    saveData();
+    saveDataCloud();
     document.getElementById('task-title').value = '';
     document.getElementById('task-enable-date').checked = false;
     document.getElementById('task-date-picker-box').classList.add('hidden');
-    updateSubcategoryFilterBar();
-    render();
   }
 
   function toggleTask(id) {
     tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-    saveData();
-    render();
+    saveDataCloud();
   }
 
   function deleteTask(id) {
     tasks = tasks.filter(t => t.id !== id);
-    saveData();
-    render();
+    saveDataCloud();
   }
 
   function toggleEdit(id) {
@@ -882,10 +860,15 @@
       hebSortKey = Math.floor(yearVal * 10000 + monthVal * 100 + dayVal);
     }
 
-    tasks = tasks.map(t => t.id === id ? { ...t, title: newTitle, assignee: newAssignee, hebrewDateDisplay: hebDateDisplay, hebrewSortKey: hebSortKey, hebDay: dayVal, hebMonth: monthVal, hebYear: yearVal, isEditing: false } : t);
+    tasks = tasks.map(t => t.id === id ? {
+      ...t,
+      title: newTitle, assignee: newAssignee,
+      hebrewDateDisplay: hebDateDisplay, hebrewSortKey: hebSortKey,
+      hebDay: dayVal, hebMonth: monthVal, hebYear: yearVal,
+      isEditing: false
+    } : t);
 
-    saveData();
-    render();
+    saveDataCloud();
   }
 
   function sortTasks(taskList) {
@@ -1049,13 +1032,8 @@
     return card;
   }
 
-  updateCategoryDropdown();
-  updateAssigneeDropdown();
-  updateSubcategoryDropdown();
-  renderCategoryFilterBar();
-  renderAssigneeFilterBar();
-  updateSubcategoryFilterBar();
-  render();
+  // הפעלת האזנה ל-Cloud בעת הטעינה
+  listenToCloudData();
 </script>
 </body>
 </html>
