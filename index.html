@@ -47,8 +47,8 @@
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs text-gray-500">קטגוריה ראשית</label>
             <div class="flex gap-1.5 text-[10px]">
-              <button type="button" onclick="promptNewCategory()" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
-              <button type="button" onclick="promptDeleteCategory()" class="text-red-500 font-bold hover:underline">🗑️</button>
+              <button type="button" onclick="openAddModal('category')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
+              <button type="button" onclick="openDeleteModal('category')" class="text-red-500 font-bold hover:underline">🗑️</button>
             </div>
           </div>
           <select id="task-category" onchange="onCategorySelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
@@ -59,8 +59,8 @@
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs text-gray-500">אחראי/ת</label>
             <div class="flex gap-1.5 text-[10px]">
-              <button type="button" onclick="promptNewAssignee()" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
-              <button type="button" onclick="promptDeleteAssignee()" class="text-red-500 font-bold hover:underline">🗑️</button>
+              <button type="button" onclick="openAddModal('assignee')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
+              <button type="button" onclick="openDeleteModal('assignee')" class="text-red-500 font-bold hover:underline">🗑️</button>
             </div>
           </div>
           <select id="task-assignee" onchange="onAssigneeSelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
@@ -93,13 +93,13 @@
         </div>
       </div>
 
-      <!-- תת-קטגוריה -->
+      <!-- קטגוריה / חנות -->
       <div>
         <div class="flex justify-between items-center mb-1">
-          <label class="block text-xs text-gray-500">תת-קטגוריה / חנות (רשות)</label>
+          <label class="block text-xs text-gray-500">קטגוריה / חנות (רשות)</label>
           <div class="flex gap-1.5 text-[10px]">
-            <button type="button" onclick="promptNewSubcategory()" class="text-indigo-600 font-bold hover:underline">+ הוסף תת-קטגוריה</button>
-            <button type="button" onclick="promptDeleteSubcategory()" class="text-red-500 font-bold hover:underline">🗑️</button>
+            <button type="button" onclick="openAddModal('subcategory')" class="text-indigo-600 font-bold hover:underline">+ הוסף קטגוריה</button>
+            <button type="button" onclick="openDeleteModal('subcategory')" class="text-red-500 font-bold hover:underline">🗑️</button>
           </div>
         </div>
         <select id="task-subcategory" onchange="onSubcategorySelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
@@ -119,15 +119,53 @@
     <!-- סרגל אחראי -->
     <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="assignee-filter-bar"></div>
 
-    <!-- סרגל תת-קטגוריות (ללא איקסים) -->
+    <!-- סרגל קטגוריות משניות -->
     <div id="subcategory-filter-bar" class="hidden flex items-center gap-1.5 overflow-x-auto pb-1">
-      <span class="text-xs text-gray-400 pl-1 font-medium whitespace-nowrap">תת-קטגוריה:</span>
+      <span class="text-xs text-gray-400 pl-1 font-medium whitespace-nowrap">קטגוריה:</span>
       <div id="subcategory-filter-buttons" class="flex gap-1.5 overflow-x-auto"></div>
     </div>
   </div>
 
   <!-- רשימת המשימות -->
   <main id="tasks-container" class="space-y-3"></main>
+
+  <!-- מודאל הוספת פריט עם אימוג'ים -->
+  <div id="add-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
+      <h3 id="add-modal-title" class="text-sm font-bold text-gray-800"></h3>
+      
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">בחר אימוג'י להצעה:</label>
+        <div id="emoji-picker" class="flex flex-wrap gap-1.5 p-2 bg-gray-50 rounded-xl border border-gray-100 max-h-28 overflow-y-auto"></div>
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">שם:</label>
+        <input type="text" id="add-modal-input" class="w-full p-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeAddModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">ביטול</button>
+        <button onclick="confirmAddModal()" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-xl">אישור</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- מודאל מחיקת פריטים בלחיצה מתוך רשימה -->
+  <div id="delete-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 id="delete-modal-title" class="text-sm font-bold text-gray-800">לחץ על מה שברצונך למחוק:</h3>
+        <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
+      </div>
+      
+      <div id="delete-modal-list" class="space-y-1.5 max-h-60 overflow-y-auto pt-1"></div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="closeDeleteModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">סגור</button>
+      </div>
+    </div>
+  </div>
 
 <script>
   const HEBREW_DAYS_LIST = [
@@ -208,6 +246,12 @@
   let activeAssignee = 'הכל';
   let activeSubcategory = 'הכל';
 
+  let currentAddType = null;
+  let currentDeleteType = null;
+
+  const CATEGORY_EMOJIS = ['🛒', '🏠', '⏰', '🧹', '📦', '🚗', '💼', '🍕', '💊', '🛠️', '📌', '⭐', '📝', '🍞', '🥩', '🧼'];
+  const ASSIGNEE_EMOJIS = ['👨', '👩', '👫', '👤', '🧑', '👧', '👦', '👵', '👴', '⭐'];
+
   function saveData() {
     localStorage.setItem('app_categories', JSON.stringify(categories));
     localStorage.setItem('app_assignees', JSON.stringify(assignees));
@@ -269,6 +313,172 @@
     }
   }
 
+  /* --- מודאלים דינמיים להוספה ומחיקה --- */
+  function openAddModal(type) {
+    currentAddType = type;
+    const modal = document.getElementById('add-modal');
+    const title = document.getElementById('add-modal-title');
+    const picker = document.getElementById('emoji-picker');
+    const input = document.getElementById('add-modal-input');
+
+    input.value = '';
+    picker.innerHTML = '';
+
+    let emojis = CATEGORY_EMOJIS;
+    if (type === 'category') {
+      title.innerText = '➕ הוספת קטגוריה ראשית';
+    } else if (type === 'assignee') {
+      title.innerText = '➕ הוספת אחראי/ת';
+      emojis = ASSIGNEE_EMOJIS;
+    } else if (type === 'subcategory') {
+      const parentCategory = document.getElementById('task-category').value;
+      title.innerText = `➕ הוספת קטגוריה עבור "${parentCategory}"`;
+    }
+
+    emojis.forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'text-lg p-1.5 hover:bg-gray-200 rounded-lg transition cursor-pointer';
+      btn.innerText = emoji;
+      btn.onclick = () => {
+        if (!input.value.startsWith(emoji)) {
+          input.value = emoji + ' ' + input.value.replace(/^[^\s]+\s/, '');
+        }
+      };
+      picker.appendChild(btn);
+    });
+
+    modal.classList.remove('hidden');
+    input.focus();
+  }
+
+  function closeAddModal() {
+    document.getElementById('add-modal').classList.add('hidden');
+    updateCategoryDropdown();
+    updateAssigneeDropdown();
+    updateSubcategoryDropdown();
+  }
+
+  function confirmAddModal() {
+    const val = document.getElementById('add-modal-input').value.trim();
+    if (!val) {
+      alert('נא להזין שם');
+      return;
+    }
+
+    if (currentAddType === 'category') {
+      if (!categories.includes(val)) {
+        categories.push(val);
+        saveData();
+      }
+      updateCategoryDropdown();
+      document.getElementById('task-category').value = val;
+      renderCategoryFilterBar();
+      updateSubcategoryDropdown();
+    } else if (currentAddType === 'assignee') {
+      if (!assignees.includes(val)) {
+        assignees.push(val);
+        saveData();
+      }
+      updateAssigneeDropdown();
+      document.getElementById('task-assignee').value = val;
+      renderAssigneeFilterBar();
+    } else if (currentAddType === 'subcategory') {
+      const parentCategory = document.getElementById('task-category').value;
+      subcategories.push({
+        id: Date.now().toString(),
+        name: val,
+        parentCategory: parentCategory
+      });
+      saveData();
+      updateSubcategoryDropdown();
+      document.getElementById('task-subcategory').value = val;
+      updateSubcategoryFilterBar();
+      render();
+    }
+
+    document.getElementById('add-modal').classList.add('hidden');
+  }
+
+  function openDeleteModal(type) {
+    currentDeleteType = type;
+    const modal = document.getElementById('delete-modal');
+    const list = document.getElementById('delete-modal-list');
+    const title = document.getElementById('delete-modal-title');
+    list.innerHTML = '';
+
+    let items = [];
+    if (type === 'category') {
+      title.innerText = 'לחץ על קטגוריה ראשית למחיקה:';
+      items = categories.map(c => ({ id: c, name: c }));
+    } else if (type === 'assignee') {
+      title.innerText = 'לחץ על אחראי/ת למחיקה:';
+      items = assignees.map(a => ({ id: a, name: a }));
+    } else if (type === 'subcategory') {
+      const parentCategory = document.getElementById('task-category').value;
+      title.innerText = `לחץ על קטגוריה למחיקה (תחת "${parentCategory}"):`;
+      items = subcategories.filter(s => s.parentCategory === parentCategory).map(s => ({ id: s.id, name: s.name, parentCategory: s.parentCategory }));
+    }
+
+    if (items.length === 0) {
+      list.innerHTML = '<div class="text-xs text-gray-400 p-2 text-center">אין פריטים ברשימה למחיקה</div>';
+    } else {
+      items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full flex justify-between items-center p-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-100 text-red-700 text-xs font-bold transition text-right cursor-pointer';
+        btn.innerHTML = `<span>${item.name}</span><span class="text-red-500 font-normal">🗑️ מחק</span>`;
+        btn.onclick = () => {
+          deleteItemFromModal(type, item);
+        };
+        list.appendChild(btn);
+      });
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.add('hidden');
+    updateCategoryDropdown();
+    updateAssigneeDropdown();
+    updateSubcategoryDropdown();
+  }
+
+  function deleteItemFromModal(type, item) {
+    if (confirm(`האם למחוק את "${item.name}"?`)) {
+      if (type === 'category') {
+        categories = categories.filter(c => c !== item.id);
+        subcategories = subcategories.filter(s => s.parentCategory !== item.id);
+        tasks = tasks.filter(t => t.category !== item.id);
+        if (activeCategory === item.id) activeCategory = 'הכל';
+        saveData();
+        updateCategoryDropdown();
+        renderCategoryFilterBar();
+        updateSubcategoryDropdown();
+        updateSubcategoryFilterBar();
+        render();
+      } else if (type === 'assignee') {
+        assignees = assignees.filter(a => a !== item.id);
+        tasks = tasks.map(t => t.assignee === item.id ? { ...t, assignee: 'שנינו' } : t);
+        if (activeAssignee === item.id) activeAssignee = 'הכל';
+        saveData();
+        updateAssigneeDropdown();
+        renderAssigneeFilterBar();
+        render();
+      } else if (type === 'subcategory') {
+        subcategories = subcategories.filter(s => s.id !== item.id);
+        tasks = tasks.filter(t => !(t.category === item.parentCategory && t.subcategory === item.name));
+        if (activeSubcategory === item.name) activeSubcategory = 'הכל';
+        saveData();
+        updateSubcategoryDropdown();
+        updateSubcategoryFilterBar();
+        render();
+      }
+      openDeleteModal(type);
+    }
+  }
+
   /* --- ניהול קטגוריות ראשיות --- */
   function updateCategoryDropdown() {
     const sel = document.getElementById('task-category');
@@ -281,7 +491,6 @@
       opt.innerText = c;
       sel.appendChild(opt);
     });
-    // אופציות פעולה בתוך הדרופדאון
     const addOpt = document.createElement('option');
     addOpt.value = '__ADD_CAT__';
     addOpt.innerText = '➕ הוסף קטגוריה חדשה...';
@@ -289,7 +498,7 @@
 
     const delOpt = document.createElement('option');
     delOpt.value = '__DEL_CAT__';
-    delOpt.innerText = '🗑️ מחק קטגוריה קיימת...';
+    delOpt.innerText = '🗑️ מחק קטגוריה...';
     sel.appendChild(delOpt);
 
     if (categories.includes(curVal)) sel.value = curVal;
@@ -298,51 +507,11 @@
   function onCategorySelectChange() {
     const val = document.getElementById('task-category').value;
     if (val === '__ADD_CAT__') {
-      promptNewCategory();
+      openAddModal('category');
     } else if (val === '__DEL_CAT__') {
-      promptDeleteCategory();
+      openDeleteModal('category');
     } else {
       updateSubcategoryDropdown();
-    }
-  }
-
-  function promptNewCategory() {
-    const name = prompt('הזן שם לקטגוריה ראשית חדשה:');
-    if (!name || !name.trim()) {
-      updateCategoryDropdown();
-      return;
-    }
-    const catName = name.trim();
-    if (!categories.includes(catName)) {
-      categories.push(catName);
-      saveData();
-    }
-    updateCategoryDropdown();
-    document.getElementById('task-category').value = catName;
-    renderCategoryFilterBar();
-    updateSubcategoryDropdown();
-  }
-
-  function promptDeleteCategory() {
-    const catName = prompt(`הזן שם קטגוריה למחיקה (${categories.join(', ')}):`);
-    if (!catName || !categories.includes(catName.trim())) {
-      updateCategoryDropdown();
-      return;
-    }
-    const cleanName = catName.trim();
-    if (confirm(`האם למחוק את הקטגוריה "${cleanName}"? משימות ותתי-קטגוריות שמשויכות אליה יימחקו!`)) {
-      categories = categories.filter(c => c !== cleanName);
-      subcategories = subcategories.filter(s => s.parentCategory !== cleanName);
-      tasks = tasks.filter(t => t.category !== cleanName);
-      if (activeCategory === cleanName) activeCategory = 'הכל';
-      saveData();
-      updateCategoryDropdown();
-      renderCategoryFilterBar();
-      updateSubcategoryDropdown();
-      updateSubcategoryFilterBar();
-      render();
-    } else {
-      updateCategoryDropdown();
     }
   }
 
@@ -374,52 +543,17 @@
   function onAssigneeSelectChange() {
     const val = document.getElementById('task-assignee').value;
     if (val === '__ADD_ASS__') {
-      promptNewAssignee();
+      openAddModal('assignee');
     } else if (val === '__DEL_ASS__') {
-      promptDeleteAssignee();
+      openDeleteModal('assignee');
     }
   }
 
-  function promptNewAssignee() {
-    const name = prompt('הזן שם אחראי/ת חדש/ה:');
-    if (!name || !name.trim()) {
-      updateAssigneeDropdown();
-      return;
-    }
-    const assName = name.trim();
-    if (!assignees.includes(assName)) {
-      assignees.push(assName);
-      saveData();
-    }
-    updateAssigneeDropdown();
-    document.getElementById('task-assignee').value = assName;
-    renderAssigneeFilterBar();
-  }
-
-  function promptDeleteAssignee() {
-    const assName = prompt(`הזן שם אחראי/ת למחיקה (${assignees.join(', ')}):`);
-    if (!assName || !assignees.includes(assName.trim())) {
-      updateAssigneeDropdown();
-      return;
-    }
-    const cleanName = assName.trim();
-    if (confirm(`האם למחוק את "${cleanName}"?`)) {
-      assignees = assignees.filter(a => a !== cleanName);
-      if (activeAssignee === cleanName) activeAssignee = 'הכל';
-      saveData();
-      updateAssigneeDropdown();
-      renderAssigneeFilterBar();
-      render();
-    } else {
-      updateAssigneeDropdown();
-    }
-  }
-
-  /* --- ניהול תתי-קטגוריות --- */
+  /* --- ניהול קטגוריות משניות --- */
   function updateSubcategoryDropdown() {
     const selectedCat = document.getElementById('task-category').value;
     const subSelect = document.getElementById('task-subcategory');
-    subSelect.innerHTML = '<option value="כללי">כללי (ללא תת-קטגוריה)</option>';
+    subSelect.innerHTML = '<option value="כללי">כללי (ללא קטגוריה נוספת)</option>';
 
     const filteredSubs = subcategories.filter(s => s.parentCategory === selectedCat);
     filteredSubs.forEach(s => {
@@ -431,85 +565,25 @@
 
     const addOpt = document.createElement('option');
     addOpt.value = '__ADD_SUB__';
-    addOpt.innerText = '➕ הוסף תת-קטגוריה חדשה...';
+    addOpt.innerText = '➕ הוסף קטגוריה חדשה...';
     subSelect.appendChild(addOpt);
 
     const delOpt = document.createElement('option');
     delOpt.value = '__DEL_SUB__';
-    delOpt.innerText = '🗑️ מחק תת-קטגוריה...';
+    delOpt.innerText = '🗑️ מחק קטגוריה...';
     subSelect.appendChild(delOpt);
   }
 
   function onSubcategorySelectChange() {
     const val = document.getElementById('task-subcategory').value;
     if (val === '__ADD_SUB__') {
-      promptNewSubcategory();
+      openAddModal('subcategory');
     } else if (val === '__DEL_SUB__') {
-      promptDeleteSubcategory();
+      openDeleteModal('subcategory');
     }
   }
 
-  function promptNewSubcategory() {
-    const parentCategory = document.getElementById('task-category').value;
-    const name = prompt(`הזן שם לתת-קטגוריה / חנות עבור "${parentCategory}":`);
-    if (!name || !name.trim()) {
-      updateSubcategoryDropdown();
-      return;
-    }
-
-    const subName = name.trim();
-    subcategories.push({
-      id: Date.now().toString(),
-      name: subName,
-      parentCategory: parentCategory
-    });
-    saveData();
-    updateSubcategoryDropdown();
-    document.getElementById('task-subcategory').value = subName;
-    updateSubcategoryFilterBar();
-    render();
-  }
-
-  function promptDeleteSubcategory() {
-    const parentCat = document.getElementById('task-category').value;
-    const catSubs = subcategories.filter(s => s.parentCategory === parentCat);
-    if (catSubs.length === 0) {
-      alert('אין תתי-קטגוריות להסרה בקטגוריה זו');
-      updateSubcategoryDropdown();
-      return;
-    }
-
-    const subNames = catSubs.map(s => s.name).join(', ');
-    const name = prompt(`הזן שם תת-קטגוריה למחיקה בקטגוריה "${parentCat}" (${subNames}):`);
-    if (!name || !name.trim()) {
-      updateSubcategoryDropdown();
-      return;
-    }
-
-    const subObj = catSubs.find(s => s.name === name.trim());
-    if (subObj) {
-      deleteSubcategory(subObj.id, subObj.name, parentCat);
-    } else {
-      alert('תת-הקטגוריה לא נמצאה');
-      updateSubcategoryDropdown();
-    }
-  }
-
-  function deleteSubcategory(subId, subName, parentCat) {
-    if (confirm(`האם למחוק את תת-הקטגוריה "${subName}"? כל המשימות בתוכה יימחקו!`)) {
-      subcategories = subcategories.filter(s => s.id !== subId);
-      tasks = tasks.filter(t => !(t.category === parentCat && t.subcategory === subName));
-      if (activeSubcategory === subName) activeSubcategory = 'הכל';
-      saveData();
-      updateSubcategoryDropdown();
-      updateSubcategoryFilterBar();
-      render();
-    } else {
-      updateSubcategoryDropdown();
-    }
-  }
-
-  /* --- סרגלי סינון (דינמיים וללא איקסים) --- */
+  /* --- סרגלי סינון --- */
   function renderCategoryFilterBar() {
     const bar = document.getElementById('category-filter-bar');
     if (!bar) return;
@@ -567,7 +641,6 @@
     barBox.classList.remove('hidden');
     buttonsBox.innerHTML = '';
 
-    // כפתור הכל
     const allBtn = createFilterButton('הכל', activeSubcategory === 'הכל', () => {
       activeSubcategory = 'הכל';
       updateSubcategoryFilterBar();
@@ -575,7 +648,6 @@
     });
     buttonsBox.appendChild(allBtn);
 
-    // כפתורים של תתי-קטגוריות בלבד - נקיים ללא איקסים!
     relevantSubs.forEach(s => {
       const btn = createFilterButton(s.name, activeSubcategory === s.name, () => {
         activeSubcategory = s.name;
@@ -804,13 +876,11 @@
       return;
     }
 
-    // אם נבחרה תת-קטגוריה ספציפית בסרגל
     if (activeSubcategory !== 'הכל') {
       filtered.forEach(task => container.appendChild(createTaskCard(task)));
       return;
     }
 
-    // תצוגה כללית מקובצת
     const generalTasks = filtered.filter(t => !t.subcategory || t.subcategory === 'כללי');
     if (generalTasks.length > 0) {
       if (activeCategory !== 'הכל' && activeCategory !== '📅 עם תאריך') {
