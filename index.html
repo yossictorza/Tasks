@@ -11,11 +11,6 @@
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
   
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- ספריות Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background-color: #f3f4f6; }
   </style>
@@ -37,7 +32,7 @@
       
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="block text-xs text-gray-500 mb-1">קטגוריה ראשי</label>
+          <label class="block text-xs text-gray-500 mb-1">קטגוריה ראשית</label>
           <select id="task-category" onchange="onCategoryChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
             <option value="קניות">🛒 קניות</option>
             <option value="מטלות בית">🏠 מטלות בית</option>
@@ -56,7 +51,7 @@
 
       <!-- שדה תאריך עברי אופציונלי -->
       <div>
-        <label class="block text-xs text-gray-500 mb-1">תאריך עברי (אופציונלי)</label>
+        <label class="block text-xs text-gray-500 mb-1">תאריך עברי / הערת זמן (אופציונלי)</label>
         <input type="text" id="task-hebrew-date" placeholder="למשל: כ&quot;ה בתשרי / ערב חג" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
       </div>
 
@@ -101,42 +96,27 @@
   <main id="tasks-container" class="space-y-3"></main>
 
 <script>
-  // ⚠️ הציבו כאן את מפתחות ה-Firebase האמיתיים שלכם כדי שמידע ימשיך להישמר!
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  let tasks = [];
-  let subcategories = [];
+  // טעינת נתונים שמורים מהמכשיר
+  let tasks = JSON.parse(localStorage.getItem('app_tasks')) || [];
+  let subcategories = JSON.parse(localStorage.getItem('app_subcategories')) || [];
   let activeCategory = 'הכל';
   let activeAssignee = 'הכל';
 
-  // חישוב והצגת תאריך לועזי ועברי בכותרת
-  const today = new Date();
-  const gregDate = today.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  const hebDate = today.toLocaleDateString('he-IL-u-ca-hebrew', { year: 'numeric', month: 'long', day: 'numeric' });
-  document.getElementById('current-date').innerText = `${gregDate} | ${hebDate}`;
+  // שמירה קבועה במכשיר
+  function saveData() {
+    localStorage.setItem('app_tasks', JSON.stringify(tasks));
+    localStorage.setItem('app_subcategories', JSON.stringify(subcategories));
+  }
 
-  // טעינת משימות בזמן אמת
-  db.collection('tasks').onSnapshot((snapshot) => {
-    tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    render();
-  });
-
-  // טעינת תתי-קטגוריות בזמן אמת
-  db.collection('subcategories').onSnapshot((snapshot) => {
-    subcategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    updateSubcategoryDropdown();
-    render();
-  });
+  // הצגת תאריך לועזי ועברי בכותרת
+  try {
+    const today = new Date();
+    const gregDate = today.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const hebDate = today.toLocaleDateString('he-IL-u-ca-hebrew', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('current-date').innerText = `${gregDate} | ${hebDate}`;
+  } catch (e) {
+    document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL');
+  }
 
   function onCategoryChange() {
     updateSubcategoryDropdown();
@@ -161,20 +141,23 @@
     const name = prompt(`הזן שם לתת-קטגוריה / חנות חדשה עבור "${parentCategory}":`);
     if (!name || !name.trim()) return;
 
-    db.collection('subcategories').add({
+    subcategories.push({
+      id: Date.now().toString(),
       name: name.trim(),
       parentCategory: parentCategory
     });
+    saveData();
+    updateSubcategoryDropdown();
+    render();
   }
 
   function deleteSubcategory(subId, subName, parentCat) {
     if (confirm(`האם למחוק את תת-הקטגוריה "${subName}"? כל המשימות בתוכה יימחקו אוטומטית!`)) {
-      db.collection('subcategories').doc(subId).delete();
-
-      const tasksToDelete = tasks.filter(t => t.category === parentCat && t.subcategory === subName);
-      tasksToDelete.forEach(t => {
-        db.collection('tasks').doc(t.id).delete();
-      });
+      subcategories = subcategories.filter(s => s.id !== subId);
+      tasks = tasks.filter(t => !(t.category === parentCat && t.subcategory === subName));
+      saveData();
+      updateSubcategoryDropdown();
+      render();
     }
   }
 
@@ -187,18 +170,20 @@
 
     if (!title) return alert('נא להזין תיאור משימה');
 
-    db.collection('tasks').add({
+    tasks.push({
+      id: Date.now().toString(),
       title,
       category,
       assignee,
       subcategory,
       hebrewDate: hebrewDate || null,
-      completed: false,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      completed: false
     });
 
+    saveData();
     document.getElementById('task-title').value = '';
     document.getElementById('task-hebrew-date').value = '';
+    render();
   }
 
   function setCategoryFilter(cat, btn) {
@@ -223,12 +208,16 @@
     render();
   }
 
-  function toggleTask(id, currentStatus) {
-    db.collection('tasks').doc(id).update({ completed: !currentStatus });
+  function toggleTask(id) {
+    tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    saveData();
+    render();
   }
 
   function deleteTask(id) {
-    db.collection('tasks').doc(id).delete();
+    tasks = tasks.filter(t => t.id !== id);
+    saveData();
+    render();
   }
 
   function toggleEdit(id) {
@@ -243,11 +232,16 @@
 
     if (!newTitle) return;
 
-    db.collection('tasks').doc(id).update({
+    tasks = tasks.map(t => t.id === id ? {
+      ...t,
       title: newTitle,
       assignee: newAssignee,
-      hebrewDate: newHebrewDate || null
-    });
+      hebrewDate: newHebrewDate || null,
+      isEditing: false
+    } : t);
+
+    saveData();
+    render();
   }
 
   function render() {
@@ -329,7 +323,7 @@
 
       card.innerHTML = `
         <div class="flex items-center gap-2.5 flex-1">
-          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}', ${task.completed})" class="w-4 h-4 text-indigo-600 rounded">
+          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}')" class="w-4 h-4 text-indigo-600 rounded">
           <div>
             <span class="text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'} font-medium block">${task.title}</span>
             <div class="flex gap-1 mt-0.5 flex-wrap">
@@ -348,6 +342,9 @@
 
     return card;
   }
+
+  updateSubcategoryDropdown();
+  render();
 </script>
 </body>
 </html>
