@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>המשימות שלנו v1.0.2</title>
+  <title>המשימות שלנו v1.0.3</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
 
-  <!-- אייקון מותאם אישית למסך הבית עם פרמטר גרסה לניקוי מטמון -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='320'>📋</text></svg>?v=2">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='320'>📋</text></svg>?v=2">
+  <!-- לוגו ואייקון מותאם אישית למסך הבית (SVG ברזולוציה גבוהה) -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
 
-  <!-- הגדרות אפליקציה במסך מלא (PWA Manifest) -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=2","display":"standalone","background_color":"%23ffffff","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27320%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+  <!-- הגדרות אפליקציה להתקנה (PWA Manifest) -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=3","display":"standalone","background_color":"%23ffffff","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27300%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
   
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -31,15 +31,20 @@
 
   <!-- כותרת ותאריך -->
   <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4 relative">
-    <span class="absolute top-2 left-3 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v1.0.2</span>
+    <span class="absolute top-2 left-3 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v1.0.3</span>
     <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו 📋</h1>
     <div id="current-date" class="text-xs font-bold text-indigo-600 mb-2"></div>
     
     <!-- מחוון חשבון / קוד משפחתי -->
-    <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-800 text-xs px-3 py-1 rounded-full font-bold">
+    <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-800 text-xs px-3 py-1 rounded-full font-bold mb-2">
       <span>🔑 חשבון: <strong id="display-group-name">...</strong></span>
       <button onclick="switchUserGroup()" class="text-[10px] text-indigo-600 underline hover:text-indigo-900">החלף</button>
     </div>
+
+    <!-- כפתור להתקנת האפליקציה בלחיצה אחת -->
+    <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto w-full cursor-pointer">
+      📲 התקן את האפליקציה למכשיר
+    </button>
   </header>
 
   <!-- באנר משימות להיום -->
@@ -198,6 +203,31 @@
   </div>
 
 <script>
+  // ניהול התקנת PWA
+  let deferredPrompt;
+  const installBtn = document.getElementById('install-pwa-btn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.classList.remove('hidden');
+  });
+
+  async function installPWA() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      if (installBtn) installBtn.classList.add('hidden');
+    }
+    deferredPrompt = null;
+  }
+
+  window.addEventListener('appinstalled', () => {
+    if (installBtn) installBtn.classList.add('hidden');
+    deferredPrompt = null;
+  });
+
   // הגדרות Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDLs89sfyIr-6aBT4A_OcXOVhLLeauWOR0",
