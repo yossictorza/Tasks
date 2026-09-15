@@ -37,7 +37,7 @@
       
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="block text-xs text-gray-500 mb-1">קטגוריה</label>
+          <label class="block text-xs text-gray-500 mb-1">קטגוריה ראשי</label>
           <select id="task-category" onchange="onCategoryChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
             <option value="קניות">🛒 קניות</option>
             <option value="מטלות בית">🏠 מטלות בית</option>
@@ -47,18 +47,18 @@
         <div>
           <label class="block text-xs text-gray-500 mb-1">אחראי/ת</label>
           <select id="task-assignee" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
-            <option value="שנינו">שנינו</option>
-            <option value="יוסי">יוסי</option>
-            <option value="אסתי">אסתי</option>
+            <option value="שנינו">👫 שנינו</option>
+            <option value="יוסי">👨 יוסי</option>
+            <option value="אסתי">👩 אסתי</option>
           </select>
         </div>
       </div>
 
-      <!-- תת-קטגוריה / חנות -->
+      <!-- בחירת תת-קטגוריה / חנות -->
       <div>
         <div class="flex justify-between items-center mb-1">
-          <label class="block text-xs text-gray-500">תת-קטגוריה / חנות</label>
-          <button onclick="promptNewSubcategory()" class="text-[11px] text-indigo-600 font-bold hover:underline">+ צור תת-קטגוריה חדשה</button>
+          <label class="block text-xs text-gray-500">תת-קטגוריה / חנות (רשות)</label>
+          <button type="button" onclick="promptNewSubcategory()" class="text-[11px] text-indigo-600 font-bold hover:underline">+ צור תת-קטגוריה חדשה</button>
         </div>
         <select id="task-subcategory" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
           <option value="כללי">כללי (ללא תת-קטגוריה)</option>
@@ -73,7 +73,7 @@
 
   <!-- סרגלי סינון -->
   <div class="space-y-2 mb-4">
-    <!-- סינון לפי קטגוריה -->
+    <!-- סינון קטגוריה ראשי -->
     <div class="flex gap-1.5 overflow-x-auto pb-1">
       <button onclick="setCategoryFilter('הכל', this)" class="cat-filter-btn active bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm whitespace-nowrap">הכל</button>
       <button onclick="setCategoryFilter('קניות', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🛒 קניות</button>
@@ -82,8 +82,8 @@
     </div>
 
     <!-- סינון לפי אחראי -->
-    <div class="flex gap-1.5 overflow-x-auto pb-1">
-      <span class="text-xs text-gray-400 self-center pl-1 font-medium">אחראי:</span>
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+      <span class="text-xs text-gray-400 pl-1 font-medium whitespace-nowrap">אחראי:</span>
       <button onclick="setAssigneeFilter('הכל', this)" class="ass-filter-btn active bg-gray-700 text-white px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">הכל</button>
       <button onclick="setAssigneeFilter('שנינו', this)" class="ass-filter-btn bg-white text-gray-600 border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">👫 שנינו</button>
       <button onclick="setAssigneeFilter('יוסי', this)" class="ass-filter-btn bg-white text-gray-600 border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">👨 יוסי</button>
@@ -92,10 +92,10 @@
   </div>
 
   <!-- רשימת המשימות -->
-  <main id="tasks-container" class="space-y-4"></main>
+  <main id="tasks-container" class="space-y-3"></main>
 
 <script>
-  // הגדרות Firebase - הזינו את הפרטים המדויקים מתוך Firebase Console
+  // ⚠️ חשוב מאוד: החליפו את הערכים למטה בפרטי ה-Firebase האמיתיים שלכם!
   const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -115,7 +115,7 @@
 
   document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  // טעינת משימות בזמן אמת
+  // טעינת משימות בענן בזמן אמת
   db.collection('tasks').onSnapshot((snapshot) => {
     tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     render();
@@ -158,11 +158,9 @@
   }
 
   function deleteSubcategory(subId, subName, parentCat) {
-    if (confirm(`האם למחוק את תת-הקטגוריה "${subName}"? כל המשימות השייכות אליה יימחקו אוטומטית!`)) {
-      // מחיקת תת-הקטגוריה
+    if (confirm(`האם למחוק את תת-הקטגוריה "${subName}"? כל המשימות בתוכה יימחקו אוטומטית!`)) {
       db.collection('subcategories').doc(subId).delete();
 
-      // מחיקת כל המשימות השייכות אליה
       const tasksToDelete = tasks.filter(t => t.category === parentCat && t.subcategory === subName);
       tasksToDelete.forEach(t => {
         db.collection('tasks').doc(t.id).delete();
@@ -241,7 +239,7 @@
     const container = document.getElementById('tasks-container');
     container.innerHTML = '';
 
-    // סינון לפי קטגוריה ואחראי
+    // סינון דינמי כפול: לפי קטגוריה ואחראי
     let filtered = tasks.filter(t => {
       const matchCat = activeCategory === 'הכל' || t.category === activeCategory;
       const matchAss = activeAssignee === 'הכל' || t.assignee === activeAssignee;
@@ -253,7 +251,7 @@
       return;
     }
 
-    // משימות כלליות (ללא תת-קטגוריה)
+    // 1. משימות כלליות (ללא תת-קטגוריה)
     const generalTasks = filtered.filter(t => !t.subcategory || t.subcategory === 'כללי');
     if (generalTasks.length > 0) {
       if (activeCategory !== 'הכל') {
@@ -265,7 +263,7 @@
       generalTasks.forEach(task => container.appendChild(createTaskCard(task)));
     }
 
-    // מקובץ לפי תתי-קטגוריות
+    // 2. מקובץ לפי תתי-קטגוריות / חנויות
     const subGrouped = {};
     filtered.filter(t => t.subcategory && t.subcategory !== 'כללי').forEach(t => {
       const key = `${t.category}___${t.subcategory}`;
@@ -278,7 +276,7 @@
       const subObj = subcategories.find(s => s.name === subName && s.parentCategory === catName);
 
       const groupCard = document.createElement('div');
-      groupCard.className = 'bg-gray-50 p-3 rounded-2xl border border-gray-200 space-y-2';
+      groupCard.className = 'bg-gray-50 p-3 rounded-2xl border border-gray-200 space-y-2 mt-2';
 
       const header = document.createElement('div');
       header.className = 'flex justify-between items-center mb-1';
@@ -295,7 +293,7 @@
 
   function createTaskCard(task) {
     const card = document.createElement('div');
-    card.className = `bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between mb-2 ${task.completed ? 'opacity-50' : ''}`;
+    card.className = `bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between mb-1.5 ${task.completed ? 'opacity-50' : ''}`;
 
     if (task.isEditing) {
       card.innerHTML = `
@@ -323,7 +321,7 @@
             <span class="text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'} font-medium block">${task.title}</span>
             <div class="flex gap-1 mt-0.5 flex-wrap">
               <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}">${task.assignee}</span>
-              ${activeCategory === 'הכל' ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">🏷️ ${task.category}</span>` : ''}
+              ${activeCategory === 'הכל' ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-bold">🏷️ ${task.category}</span>` : ''}
             </div>
           </div>
         </div>
