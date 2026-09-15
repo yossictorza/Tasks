@@ -3,23 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>המשימות שלנו v1.1.1</title>
+  <title>המשימות שלנו v1.1.2</title>
   
-  <!-- הגדרות תצוגה כאפליקציית מסך בית -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
 
-  <!-- אייקון מובנה ישירות לקוד ללא צורך בקבצים חיצוניים -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%234f46e5'/><text x='50%' y='53%' dominant-baseline='middle' text-anchor='middle' font-size='240' fill='%23ffffff'>📋</text></svg>">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%234f46e5'/><text x='50%' y='53%' dominant-baseline='middle' text-anchor='middle' font-size='240' fill='%23ffffff'>📋</text></svg>">
+  <!-- אייקון מתוקן וישיר -->
+  <link rel="apple-touch-icon" href="https://fav.farm/📋">
+  <link rel="icon" href="https://fav.farm/📋">
 
-  <!-- מניפסט דינמי מובנה שמבטיח שדפדפנים יזהו את האפליקציה ויציגו את הלוגו בזמן ההתקנה -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=11","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27><rect width=%27512%27 height=%27512%27 rx=%27110%27 fill=%27%234f46e5%27/><text x=%2750%%27 y=%2753%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27240%27 fill=%27%23ffffff%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+  <!-- מניפסט בסיסי ונקי -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=12","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"https://fav.farm/📋","sizes":"512x512","type":"image/png"}]}'>
   
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -33,7 +31,7 @@
 
   <!-- כותרת ראשית -->
   <header class="bg-white rounded-3xl p-5 shadow-xs border border-slate-200/60 text-center mb-4 relative">
-    <span class="absolute top-3 left-3 text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">v1.1.1</span>
+    <span class="absolute top-3 left-3 text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">v1.1.2</span>
     
     <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-md mb-2.5 text-white">
       📋
@@ -47,7 +45,6 @@
       <button onclick="switchUserGroup()" class="text-[11px] text-indigo-600 hover:text-indigo-800 underline font-extrabold transition mr-1">החלף</button>
     </div>
 
-    <!-- כפתורי פעולה בראש העמוד -->
     <div class="grid grid-cols-2 gap-2 mt-1">
       <button onclick="installPWA()" class="bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-extrabold p-3 rounded-2xl shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
         📲 התקן אפליקציה
@@ -182,39 +179,14 @@
 
       <div class="space-y-3 text-xs text-slate-600 leading-relaxed font-medium">
         <div class="bg-indigo-50/70 p-3 rounded-2xl border border-indigo-100">
-          <strong class="text-indigo-900 block mb-1">📲 התקנה על מסך הבית (אנדרואיד / כרום):</strong>
-          1. לחץ על כפתור <b>"התקן אפליקציה"</b> או על <b>תפריט 3 הנקודות ⋮</b> בדפדפן.<br>
+          <strong class="text-indigo-900 block mb-1">📲 התקנה על מסך הבית:</strong>
+          1. לחץ על כפתור <b>"התקן אפליקציה"</b> או על <b>תפריט 3 הנקודות ⋮</b> בדפדפן הרגיל.<br>
           2. בחר ב-<b>"התקן אפליקציה"</b> או <b>"הוסף למסך הבית"</b>.<br>
-          3. האייקון המעוצב יופיע במסך הבית שלך כאפליקציה לכל דבר.
-        </div>
-
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
-          <strong class="text-slate-800 block mb-1">🔑 שיתוף משפחתי (קוד משפחה):</strong>
-          האפליקציה מסתנכרנת בענן לפי קוד משפחה. כדי ששני מכשירים יראו את אותן משימות, ודא ששניהם מגדירים את אותו קוד דרך כפתור ה<b>"החלף"</b> שליד שם החשבון בראש העמוד.
-        </div>
-
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
-          <strong class="text-slate-800 block mb-1">📅 תאריכים עבריים ומשימות להיום:</strong>
-          ניתן להוסיף תאריך עברי לכל משימה. משימות שתאריכן חל היום יופיעו באופן אוטומטי ב<b>באנר המיוחד בראש העמוד</b> כדי שלא תפספסו כלום!
-        </div>
-
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
-          <strong class="text-slate-800 block mb-1">✏️ ניהול קטגוריות ואחראים:</strong>
-          ליד כל שורת בחירה (קטגוריה או אחראי) יש לחצני <b>+ הוסף</b>, <b>✏️ ערוך</b> ו-<b>🗑️ מחק</b> שמאפשרים לך להתאים אישית את הרשימות בכל רגע.
+          3. האייקון המעוצב יופיע במסך הבית שלך.
         </div>
       </div>
 
       <button onclick="closeInstructionsModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 rounded-2xl text-xs transition cursor-pointer">הבנתי, תודה!</button>
-    </div>
-  </div>
-
-  <!-- מודאל התקנה רגיל -->
-  <div id="install-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-xl space-y-4 text-center">
-      <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl mx-auto flex items-center justify-center text-2xl shadow">📋</div>
-      <h3 class="text-base font-extrabold text-slate-900">הוספה למסך הבית</h3>
-      <p id="install-instructions-text" class="text-xs text-slate-600 leading-relaxed font-medium"></p>
-      <button onclick="closeInstallModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 rounded-2xl text-xs transition cursor-pointer">הבנתי, תודה!</button>
     </div>
   </div>
 
@@ -223,7 +195,7 @@
     <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-xl space-y-4">
       <h3 id="add-modal-title" class="text-sm font-extrabold text-slate-800"></h3>
       <div>
-        <label class="block text-xs font-bold text-slate-500 mb-1.5">בחר אימוג'י להצעה:</label>
+        <label class="block text-xs font-bold text-slate-500 mb-1.5">בחר אימוג'י:</label>
         <div id="emoji-picker" class="flex flex-wrap gap-2 p-2.5 bg-slate-50 rounded-2xl border border-slate-100 max-h-28 overflow-y-auto"></div>
       </div>
       <div>
@@ -244,9 +216,7 @@
         <h3 id="edit-modal-title" class="text-sm font-extrabold text-slate-800">עריכת פריטים:</h3>
         <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 font-extrabold text-sm cursor-pointer">✕</button>
       </div>
-      
       <div id="edit-modal-list" class="space-y-2.5 max-h-60 overflow-y-auto pt-1"></div>
-
       <div class="flex justify-end pt-2 border-t border-slate-100">
         <button onclick="closeEditModal()" class="px-4 py-2 text-xs font-extrabold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition cursor-pointer">סגור</button>
       </div>
@@ -260,9 +230,7 @@
         <h3 id="delete-modal-title" class="text-sm font-extrabold text-slate-800">לחץ על מה שברצונך למחוק:</h3>
         <button onclick="closeDeleteModal()" class="text-slate-400 hover:text-slate-600 font-extrabold text-sm cursor-pointer">✕</button>
       </div>
-      
       <div id="delete-modal-list" class="space-y-2 max-h-60 overflow-y-auto pt-1"></div>
-
       <div class="flex justify-end pt-2 border-t border-slate-100">
         <button onclick="closeDeleteModal()" class="px-4 py-2 text-xs font-extrabold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition cursor-pointer">סגור</button>
       </div>
@@ -280,7 +248,6 @@
   }
 
   let deferredPrompt;
-
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -290,27 +257,15 @@
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        deferredPrompt = null;
-      }
+      if (outcome === 'accepted') deferredPrompt = null;
       return;
     }
-
-    const modal = document.getElementById('install-modal');
-    const textElem = document.getElementById('install-instructions-text');
-
-    textElem.innerHTML = 'כדי להתקין את האפליקציה במסך הבית עם האייקון המעוצב:<br><br>1. לחץ על כפתור <b>תפריט 3 הנקודות ⋮</b> בפינה העליונה של דפדפן כרום.<br>2. בחר באפשרות <b>"התקן אפליקציה" (Install app)</b> או <b>"הוסף למסך הבית"</b>.<br>3. לחץ על <b>"התקן"</b> בחלון שייפתח.';
-    modal.classList.remove('hidden');
-  }
-
-  function closeInstallModal() {
-    document.getElementById('install-modal').classList.add('hidden');
+    alert('כדי להתקין את האפליקציה, לחץ על שלוש הנקודות ⋮ בדפדפן ובחר ב-"התקן אפליקציה" או "הוסף למסך הבית".');
   }
 
   function openInstructionsModal() {
     document.getElementById('instructions-modal').classList.remove('hidden');
   }
-
   function closeInstructionsModal() {
     document.getElementById('instructions-modal').classList.add('hidden');
   }
@@ -409,9 +364,6 @@
   let activeSubcategory = 'הכל';
 
   let currentAddType = null;
-  let currentEditType = null;
-  let currentDeleteType = null;
-
   let unsubscribeListener = null;
 
   const CATEGORY_EMOJIS = ['🛒', '🏠', '⏰', '🧹', '📦', '🚗', '💼', '🍕', '💊', '🛠️', '📌', '⭐', '📝', '🍞', '🥩', '🧼'];
@@ -423,8 +375,8 @@
     unsubscribeListener = db.collection('user_groups').doc(userGroup).onSnapshot(doc => {
       if (doc.exists) {
         const data = doc.data();
-        categories = data.categories || ['🛒 קניות', '🏠 מטלות בית', '⏰ תזכורות'];
-        assignees = data.assignees || ['👫 שנינו', '👨 יוסי', '👩 אסתי'];
+        categories = data.categories || categories;
+        assignees = data.assignees || assignees;
         subcategories = data.subcategories || [];
         tasks = data.tasks || [];
       } else {
@@ -443,10 +395,7 @@
 
   function saveDataCloud() {
     db.collection('user_groups').doc(userGroup).set({
-      categories: categories,
-      assignees: assignees,
-      subcategories: subcategories,
-      tasks: tasks
+      categories, assignees, subcategories, tasks
     }, { merge: true });
   }
 
@@ -497,7 +446,7 @@
     const box = document.getElementById('task-date-picker-box');
     if (chk.checked) {
       box.classList.remove('hidden');
-      initHebrewDateDropdowns('task-heb-day', 'task-heb-month', 'task-heb-year', todayHeb.day, todayHeb.monthCode, todayHeb.year);
+      initHebrewDateDropdowns('task-heb-day', 'task-heb-month', 'task-heb-year');
     } else {
       box.classList.add('hidden');
     }
@@ -514,14 +463,13 @@
     picker.innerHTML = '';
 
     let emojis = CATEGORY_EMOJIS;
-    if (type === 'category') {
-      title.innerText = '➕ הוספת קטגוריה ראשית';
-    } else if (type === 'assignee') {
+    if (type === 'category') title.innerText = '➕ הוספת קטגוריה ראשית';
+    else if (type === 'assignee') {
       title.innerText = '➕ הוספת אחראי/ת';
       emojis = ASSIGNEE_EMOJIS;
     } else if (type === 'subcategory') {
       const parentCategory = document.getElementById('task-category').value;
-      title.innerText = `➕ הוספת קטגוריה עבור "${parentCategory}"`;
+      title.innerText = `➕ הוספת תת-קטגוריה עבור "${parentCategory}"`;
     }
 
     emojis.forEach(emoji => {
@@ -530,9 +478,7 @@
       btn.className = 'text-xl p-2 hover:bg-slate-200/70 rounded-xl transition cursor-pointer';
       btn.innerText = emoji;
       btn.onclick = () => {
-        if (!input.value.startsWith(emoji)) {
-          input.value = emoji + ' ' + input.value.replace(/^[^\s]+\s/, '');
-        }
+        input.value = emoji + ' ' + input.value.replace(/^[^\s]+\s/, '');
       };
       picker.appendChild(btn);
     });
@@ -552,54 +498,31 @@
     const val = document.getElementById('add-modal-input').value.trim();
     if (!val) return alert('נא להזין שם');
 
-    if (currentAddType === 'category') {
-      if (!categories.includes(val)) {
-        categories.push(val);
-        saveDataCloud();
-      }
-    } else if (currentAddType === 'assignee') {
-      if (!assignees.includes(val)) {
-        assignees.push(val);
-        saveDataCloud();
-      }
+    if (currentAddType === 'category' && !categories.includes(val)) {
+      categories.push(val);
+      saveDataCloud();
+    } else if (currentAddType === 'assignee' && !assignees.includes(val)) {
+      assignees.push(val);
+      saveDataCloud();
     } else if (currentAddType === 'subcategory') {
       const parentCategory = document.getElementById('task-category').value;
-      subcategories.push({ id: Date.now().toString(), name: val, parentCategory: parentCategory });
+      subcategories.push({ id: Date.now().toString(), name: val, parentCategory });
       saveDataCloud();
     }
-
-    document.getElementById('add-modal').classList.add('hidden');
+    closeAddModal();
   }
 
   function openEditModal(type) {
-    currentEditType = type;
     const modal = document.getElementById('edit-modal');
     const list = document.getElementById('edit-modal-list');
     const title = document.getElementById('edit-modal-title');
     list.innerHTML = '';
 
-    let itemsSet = new Set();
-
-    if (type === 'category') {
-      title.innerText = '✏️ עריכת קטגוריות ראשיות:';
-      categories.forEach(c => itemsSet.add(c));
-    } else if (type === 'assignee') {
-      title.innerText = '✏️ עריכת אחראים:';
-      assignees.forEach(a => itemsSet.add(a));
-    } else if (type === 'subcategory') {
-      const parentCategory = document.getElementById('task-category').value;
-      title.innerText = `✏️ עריכת קטגוריות משנה (${parentCategory || 'הכל'}):`;
-      subcategories.forEach(s => {
-        if (!parentCategory || s.parentCategory === parentCategory || !s.parentCategory) {
-          itemsSet.add(s.name);
-        }
-      });
-    }
-
-    const items = Array.from(itemsSet);
+    let items = type === 'category' ? categories : (type === 'assignee' ? assignees : subcategories.map(s => s.name));
+    title.innerText = `✏️ עריכת פריטים:`;
 
     if (items.length === 0) {
-      list.innerHTML = '<div class="text-xs text-slate-400 p-2 text-center">אין פריטים קיימים לעריכה</div>';
+      list.innerHTML = '<div class="text-xs text-slate-400 p-2 text-center">אין פריטים לעריכה</div>';
     } else {
       items.forEach((oldName, idx) => {
         const itemRow = document.createElement('div');
@@ -607,138 +530,72 @@
         
         const input = document.createElement('input');
         input.type = 'text';
-        input.id = `edit-item-input-${idx}`;
         input.value = oldName;
-        input.className = 'flex-1 p-2.5 text-xs border border-slate-200 rounded-xl outline-none focus:border-indigo-500 bg-white font-bold';
+        input.className = 'flex-1 p-2.5 text-xs border border-slate-200 rounded-xl outline-none bg-white font-bold';
 
         const saveBtn = document.createElement('button');
         saveBtn.type = 'button';
-        saveBtn.className = 'bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl transition whitespace-nowrap cursor-pointer';
+        saveBtn.className = 'bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-xs px-3.5 py-2.5 rounded-xl cursor-pointer';
         saveBtn.innerText = 'שמור';
-        saveBtn.onclick = () => renameItem(type, oldName, input.value.trim());
+        saveBtn.onclick = () => {
+          const newName = input.value.trim();
+          if (!newName || newName === oldName) return;
+          if (type === 'category') {
+            categories = categories.map(c => c === oldName ? newName : c);
+          } else if (type === 'assignee') {
+            assignees = assignees.map(a => a === oldName ? newName : a);
+          } else {
+            subcategories = subcategories.map(s => s.name === oldName ? { ...s, name: newName } : s);
+          }
+          saveDataCloud();
+          openEditModal(type);
+        };
 
         itemRow.appendChild(input);
         itemRow.appendChild(saveBtn);
         list.appendChild(itemRow);
       });
     }
-
     modal.classList.remove('hidden');
   }
 
-  function closeEditModal() {
-    document.getElementById('edit-modal').classList.add('hidden');
-  }
-
-  function renameItem(type, oldName, newName) {
-    if (!newName) return alert('נא להזין שם תקין');
-    if (oldName === newName) return alert('לא בוצע שינוי בשם');
-
-    if (type === 'category') {
-      categories = categories.map(c => c === oldName ? newName : c);
-      subcategories = subcategories.map(s => s.parentCategory === oldName ? { ...s, parentCategory: newName } : s);
-      tasks = tasks.map(t => t.category === oldName ? { ...t, category: newName } : t);
-      if (activeCategory === oldName) activeCategory = newName;
-    } else if (type === 'assignee') {
-      assignees = assignees.map(a => a === oldName ? newName : a);
-      tasks = tasks.map(t => t.assignee === oldName ? { ...t, assignee: newName } : t);
-      if (activeAssignee === oldName) activeAssignee = newName;
-    } else if (type === 'subcategory') {
-      subcategories = subcategories.map(s => s.name === oldName ? { ...s, name: newName } : s);
-      tasks = tasks.map(t => t.subcategory === oldName ? { ...t, subcategory: newName } : t);
-      if (activeSubcategory === oldName) activeSubcategory = newName;
-    }
-
-    saveDataCloud();
-    openEditModal(type);
-  }
+  function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
 
   function openDeleteModal(type) {
-    currentDeleteType = type;
     const modal = document.getElementById('delete-modal');
     const list = document.getElementById('delete-modal-list');
-    const title = document.getElementById('delete-modal-title');
     list.innerHTML = '';
 
-    let itemsSet = new Set();
-
-    if (type === 'category') {
-      title.innerText = 'לחץ על קטגוריה ראשית למחיקה:';
-      categories.forEach(c => itemsSet.add(c));
-    } else if (type === 'assignee') {
-      title.innerText = 'לחץ על אחראי/ת למחיקה:';
-      assignees.forEach(a => itemsSet.add(a));
-    } else if (type === 'subcategory') {
-      const parentCategory = document.getElementById('task-category').value;
-      title.innerText = `לחץ על קטגוריה למחיקה:`;
-      subcategories.forEach(s => {
-        if (!parentCategory || s.parentCategory === parentCategory || !s.parentCategory) {
-          itemsSet.add(s.name);
+    let items = type === 'category' ? categories : (type === 'assignee' ? assignees : subcategories.map(s => s.name));
+    items.forEach(itemName => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'w-full flex justify-between items-center p-3 rounded-2xl bg-rose-50/80 hover:bg-rose-100 border border-rose-100 text-rose-700 text-xs font-extrabold cursor-pointer';
+      btn.innerHTML = `<span>${itemName}</span><span>🗑️ מחק</span>`;
+      btn.onclick = () => {
+        if (confirm(`למחוק את "${itemName}"?`)) {
+          if (type === 'category') categories = categories.filter(c => c !== itemName);
+          else if (type === 'assignee') assignees = assignees.filter(a => a !== itemName);
+          else subcategories = subcategories.filter(s => s.name !== itemName);
+          saveDataCloud();
+          openDeleteModal(type);
         }
-      });
-    }
-
-    const items = Array.from(itemsSet);
-
-    if (items.length === 0) {
-      list.innerHTML = '<div class="text-xs text-slate-400 p-2 text-center">אין פריטים ברשימה למחיקה</div>';
-    } else {
-      items.forEach(itemName => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'w-full flex justify-between items-center p-3 rounded-2xl bg-rose-50/80 hover:bg-rose-100 border border-rose-100 text-rose-700 text-xs font-extrabold transition text-right cursor-pointer';
-        btn.innerHTML = `<span>${itemName}</span><span class="text-rose-500 font-normal">🗑️ מחק</span>`;
-        btn.onclick = () => deleteItemFromModal(type, itemName);
-        list.appendChild(btn);
-      });
-    }
-
+      };
+      list.appendChild(btn);
+    });
     modal.classList.remove('hidden');
   }
 
-  function closeDeleteModal() {
-    document.getElementById('delete-modal').classList.add('hidden');
-  }
-
-  function deleteItemFromModal(type, itemName) {
-    if (confirm(`האם למחוק את "${itemName}" מכל המקומות?`)) {
-      if (type === 'category') {
-        categories = categories.filter(c => c !== itemName);
-        subcategories = subcategories.filter(s => s.parentCategory !== itemName);
-        tasks = tasks.filter(t => t.category !== itemName);
-        if (activeCategory === itemName) activeCategory = 'הכל';
-      } else if (type === 'assignee') {
-        assignees = assignees.filter(a => a !== itemName);
-        tasks = tasks.map(t => t.assignee === itemName ? { ...t, assignee: 'שנינו' } : t);
-        if (activeAssignee === itemName) activeAssignee = 'הכל';
-      } else if (type === 'subcategory') {
-        subcategories = subcategories.filter(s => s.name !== itemName);
-        tasks = tasks.filter(t => t.subcategory !== itemName);
-        if (activeSubcategory === itemName) activeSubcategory = 'הכל';
-      }
-
-      saveDataCloud();
-      openDeleteModal(type);
-    }
-  }
+  function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
 
   function updateCategoryDropdown() {
     const sel = document.getElementById('task-category');
     if (!sel) return;
-    const curVal = sel.value;
     sel.innerHTML = '';
-    categories.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c;
-      opt.innerText = c;
-      sel.appendChild(opt);
-    });
-    
+    categories.forEach(c => sel.appendChild(new Option(c, c)));
     sel.appendChild(new Option('➕ הוסף קטגוריה חדשה...', '__ADD_CAT__'));
     sel.appendChild(new Option('✏️ ערוך קטגוריות...', '__EDIT_CAT__'));
     sel.appendChild(new Option('🗑️ מחק קטגוריה...', '__DEL_CAT__'));
-
-    if (categories.includes(curVal)) sel.value = curVal;
   }
 
   function onCategorySelectChange() {
@@ -752,20 +609,11 @@
   function updateAssigneeDropdown() {
     const sel = document.getElementById('task-assignee');
     if (!sel) return;
-    const curVal = sel.value;
     sel.innerHTML = '';
-    assignees.forEach(a => {
-      const opt = document.createElement('option');
-      opt.value = a;
-      opt.innerText = a;
-      sel.appendChild(opt);
-    });
-    
+    assignees.forEach(a => sel.appendChild(new Option(a, a)));
     sel.appendChild(new Option('➕ הוסף אחראי/ת...', '__ADD_ASS__'));
     sel.appendChild(new Option('✏️ ערוך אחראים...', '__EDIT_ASS__'));
     sel.appendChild(new Option('🗑️ מחק אחראי/ת...', '__DEL_ASS__'));
-
-    if (assignees.includes(curVal)) sel.value = curVal;
   }
 
   function onAssigneeSelectChange() {
@@ -779,15 +627,12 @@
     const selectedCat = document.getElementById('task-category').value;
     const subSelect = document.getElementById('task-subcategory');
     subSelect.innerHTML = '<option value="כללי">כללי (ללא קטגוריה נוספת)</option>';
-
-    const filteredSubs = subcategories.filter(s => s.parentCategory === selectedCat);
-    filteredSubs.forEach(s => {
+    subcategories.filter(s => s.parentCategory === selectedCat).forEach(s => {
       subSelect.appendChild(new Option(s.name, s.name));
     });
-
-    subSelect.appendChild(new Option('➕ הוסף קטגוריה חדשה...', '__ADD_SUB__'));
-    subSelect.appendChild(new Option('✏️ ערוך קטגוריות...', '__EDIT_SUB__'));
-    subSelect.appendChild(new Option('🗑️ מחק קטגוריה...', '__DEL_SUB__'));
+    subSelect.appendChild(new Option('➕ הוסף תת-קטגוריה...', '__ADD_SUB__'));
+    subSelect.appendChild(new Option('✏️ ערוך תת-קטגוריות...', '__EDIT_SUB__'));
+    subSelect.appendChild(new Option('🗑️ מחק תת-קטגוריה...', '__DEL_SUB__'));
   }
 
   function onSubcategorySelectChange() {
@@ -801,25 +646,17 @@
     const bar = document.getElementById('category-filter-bar');
     if (!bar) return;
     bar.innerHTML = '';
-
     bar.appendChild(createFilterButton('הכל', activeCategory === 'הכל', () => setCategoryFilter('הכל')));
     bar.appendChild(createFilterButton('📅 עם תאריך', activeCategory === '📅 עם תאריך', () => setCategoryFilter('📅 עם תאריך')));
-
-    categories.forEach(c => {
-      bar.appendChild(createFilterButton(c, activeCategory === c, () => setCategoryFilter(c)));
-    });
+    categories.forEach(c => bar.appendChild(createFilterButton(c, activeCategory === c, () => setCategoryFilter(c))));
   }
 
   function renderAssigneeFilterBar() {
     const bar = document.getElementById('assignee-filter-bar');
     if (!bar) return;
     bar.innerHTML = '';
-
     bar.appendChild(createFilterButton('הכל', activeAssignee === 'הכל', () => setAssigneeFilter('הכל'), 'ass'));
-
-    assignees.forEach(a => {
-      bar.appendChild(createFilterButton(a, activeAssignee === a, () => setAssigneeFilter(a), 'ass'));
-    });
+    assignees.forEach(a => bar.appendChild(createFilterButton(a, activeAssignee === a, () => setAssigneeFilter(a), 'ass')));
   }
 
   function updateSubcategoryFilterBar() {
@@ -827,12 +664,9 @@
     const buttonsBox = document.getElementById('subcategory-filter-buttons');
     if (!barBox || !buttonsBox) return;
 
-    let relevantSubs = [];
-    if (activeCategory === 'הכל' || activeCategory === '📅 עם תאריך') {
-      relevantSubs = subcategories;
-    } else {
-      relevantSubs = subcategories.filter(s => s.parentCategory === activeCategory);
-    }
+    let relevantSubs = activeCategory === 'הכל' || activeCategory === '📅 עם תאריך' 
+      ? subcategories 
+      : subcategories.filter(s => s.parentCategory === activeCategory);
 
     if (relevantSubs.length === 0) {
       barBox.classList.add('hidden');
@@ -842,46 +676,23 @@
 
     barBox.classList.remove('hidden');
     buttonsBox.innerHTML = '';
-
-    buttonsBox.appendChild(createFilterButton('הכל', activeSubcategory === 'הכל', () => {
-      activeSubcategory = 'הכל';
-      updateSubcategoryFilterBar();
-      render();
-    }));
-
+    buttonsBox.appendChild(createFilterButton('הכל', activeSubcategory === 'הכל', () => { activeSubcategory = 'הכל'; updateSubcategoryFilterBar(); render(); }));
     relevantSubs.forEach(s => {
-      buttonsBox.appendChild(createFilterButton(s.name, activeSubcategory === s.name, () => {
-        activeSubcategory = s.name;
-        updateSubcategoryFilterBar();
-        render();
-      }));
+      buttonsBox.appendChild(createFilterButton(s.name, activeSubcategory === s.name, () => { activeSubcategory = s.name; updateSubcategoryFilterBar(); render(); }));
     });
   }
 
   function createFilterButton(text, isActive, onClick, type='cat') {
     const btn = document.createElement('button');
-    let activeClasses = 'bg-indigo-600 text-white shadow-xs';
-    if (type === 'ass') activeClasses = 'bg-slate-800 text-white shadow-xs';
-
-    btn.className = `${isActive ? activeClasses : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200/60'} px-3.5 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer`;
+    let activeClasses = type === 'ass' ? 'bg-slate-800 text-white shadow-xs' : 'bg-indigo-600 text-white shadow-xs';
+    btn.className = `${isActive ? activeClasses : 'bg-slate-100 text-slate-600 border border-slate-200/60 hover:bg-slate-200'} px-3.5 py-1.5 rounded-2xl text-xs font-extrabold whitespace-nowrap transition cursor-pointer`;
     btn.innerText = text;
     btn.onclick = onClick;
     return btn;
   }
 
-  function setCategoryFilter(cat) {
-    activeCategory = cat;
-    activeSubcategory = 'הכל';
-    renderCategoryFilterBar();
-    updateSubcategoryFilterBar();
-    render();
-  }
-
-  function setAssigneeFilter(ass) {
-    activeAssignee = ass;
-    renderAssigneeFilterBar();
-    render();
-  }
+  function setCategoryFilter(cat) { activeCategory = cat; activeSubcategory = 'הכל'; renderCategoryFilterBar(); updateSubcategoryFilterBar(); render(); }
+  function setAssigneeFilter(ass) { activeAssignee = ass; renderAssigneeFilterBar(); render(); }
 
   function addTask() {
     const title = document.getElementById('task-title').value.trim();
@@ -893,12 +704,10 @@
     if (!title) return alert('נא להזין תיאור משימה');
 
     let hebDateDisplay = null, hebSortKey = null, dayVal = null, monthVal = null, yearVal = null;
-
     if (hasDate) {
       dayVal = parseInt(document.getElementById('task-heb-day').value) || todayHeb.day;
       monthVal = parseFloat(document.getElementById('task-heb-month').value) || todayHeb.monthCode;
       yearVal = parseInt(document.getElementById('task-heb-year').value) || todayHeb.year;
-
       const monthObj = HEBREW_MONTHS_LIST.find(m => m.code === monthVal) || HEBREW_MONTHS_LIST[0];
       hebDateDisplay = `${HEBREW_DAYS_LIST[dayVal]} ב${monthObj.name} ${toHebrewYear(yearVal)}`;
       hebSortKey = Math.floor(yearVal * 10000 + monthVal * 100 + dayVal);
@@ -907,8 +716,7 @@
     tasks.push({
       id: Date.now().toString(),
       title, category, assignee, subcategory,
-      hebrewDateDisplay: hebDateDisplay,
-      hebrewSortKey: hebSortKey,
+      hebrewDateDisplay: hebDateDisplay, hebrewSortKey: hebSortKey,
       hebDay: dayVal, hebMonth: monthVal, hebYear: yearVal,
       completed: false
     });
@@ -949,7 +757,7 @@
     const box = document.getElementById(`edit-date-box-${id}`);
     if (chk.checked) {
       box.classList.remove('hidden');
-      initHebrewDateDropdowns(`edit-heb-day-${id}`, `edit-heb-month-${id}`, `edit-heb-year-${id}`, todayHeb.day, todayHeb.monthCode, todayHeb.year);
+      initHebrewDateDropdowns(`edit-heb-day-${id}`, `edit-heb-month-${id}`, `edit-heb-year-${id}`);
     } else {
       box.classList.add('hidden');
     }
@@ -959,37 +767,30 @@
     const newTitle = document.getElementById(`edit-title-${id}`).value.trim();
     const newAssignee = document.getElementById(`edit-assignee-${id}`).value;
     const hasDate = document.getElementById(`edit-enable-date-${id}`).checked;
-
     if (!newTitle) return;
 
     let hebDateDisplay = null, hebSortKey = null, dayVal = null, monthVal = null, yearVal = null;
-
     if (hasDate) {
       dayVal = parseInt(document.getElementById(`edit-heb-day-${id}`).value) || todayHeb.day;
       monthVal = parseFloat(document.getElementById(`edit-heb-month-${id}`).value) || todayHeb.monthCode;
       yearVal = parseInt(document.getElementById(`edit-heb-year-${id}`).value) || todayHeb.year;
-
       const monthObj = HEBREW_MONTHS_LIST.find(m => m.code === monthVal) || HEBREW_MONTHS_LIST[0];
       hebDateDisplay = `${HEBREW_DAYS_LIST[dayVal]} ב${monthObj.name} ${toHebrewYear(yearVal)}`;
       hebSortKey = Math.floor(yearVal * 10000 + monthVal * 100 + dayVal);
     }
 
     tasks = tasks.map(t => t.id === id ? {
-      ...t,
-      title: newTitle, assignee: newAssignee,
+      ...t, title: newTitle, assignee: newAssignee,
       hebrewDateDisplay: hebDateDisplay, hebrewSortKey: hebSortKey,
       hebDay: dayVal, hebMonth: monthVal, hebYear: yearVal,
       isEditing: false
     } : t);
-
     saveDataCloud();
   }
 
   function sortTasks(taskList) {
     return taskList.sort((a, b) => {
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1;
-      }
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
       if (a.hebrewSortKey && b.hebrewSortKey) return a.hebrewSortKey - b.hebrewSortKey;
       if (a.hebrewSortKey && !b.hebrewSortKey) return -1;
       if (!a.hebrewSortKey && b.hebrewSortKey) return 1;
@@ -1004,7 +805,6 @@
     const todayDateText = document.getElementById('today-date-text');
 
     const todayTasks = tasks.filter(t => t.hebrewSortKey === todayHeb.sortKey && !t.completed);
-
     if (todayTasks.length === 0) {
       todayBanner.classList.add('hidden');
       return;
@@ -1031,19 +831,13 @@
 
   function render() {
     updateTodayBanner();
-
     const container = document.getElementById('tasks-container');
     container.innerHTML = '';
 
     let filtered = tasks.filter(t => {
-      let matchCat = false;
-      if (activeCategory === 'הכל') matchCat = true;
-      else if (activeCategory === '📅 עם תאריך') matchCat = !!t.hebrewSortKey || !!t.hebrewDateDisplay;
-      else matchCat = t.category === activeCategory;
-
-      const matchAss = activeAssignee === 'הכל' || t.assignee === activeAssignee;
-      const matchSub = activeSubcategory === 'הכל' || t.subcategory === activeSubcategory;
-
+      let matchCat = activeCategory === 'הכל' ? true : (activeCategory === '📅 עם תאריך' ? !!t.hebrewSortKey : t.category === activeCategory);
+      let matchAss = activeAssignee === 'הכל' || t.assignee === activeAssignee;
+      let matchSub = activeSubcategory === 'הכל' || t.subcategory === activeSubcategory;
       return matchCat && matchAss && matchSub;
     });
 
@@ -1079,7 +873,6 @@
 
     for (const [groupKey, items] of Object.entries(subGrouped)) {
       const [catName, subName] = groupKey.split('___');
-
       const groupCard = document.createElement('div');
       groupCard.className = 'bg-slate-200/50 p-3.5 rounded-3xl border border-slate-300/40 space-y-2 mt-3';
 
@@ -1096,13 +889,12 @@
   function createTaskCard(task) {
     const card = document.createElement('div');
     const isToday = task.hebrewSortKey === todayHeb.sortKey;
-    
     card.className = `bg-white p-4 rounded-2xl shadow-2xs border ${isToday ? 'border-amber-300 bg-amber-50/20' : 'border-slate-200/60'} flex items-center justify-between mb-2 transition ${task.completed ? 'opacity-50 bg-slate-50/50' : ''}`;
 
     if (task.isEditing) {
       card.innerHTML = `
         <div class="w-full space-y-3 p-1">
-          <input type="text" id="edit-title-${task.id}" value="${task.title}" class="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 font-bold">
+          <input type="text" id="edit-title-${task.id}" value="${task.title}" class="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none font-bold">
           <div class="grid grid-cols-2 gap-2">
             <select id="edit-assignee-${task.id}" class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white font-bold">
               ${assignees.map(a => `<option value="${a}" ${task.assignee === a ? 'selected' : ''}>${a}</option>`).join('')}
@@ -1118,7 +910,7 @@
             <select id="edit-heb-year-${task.id}" class="p-2 border border-slate-200 rounded-lg text-xs bg-white font-bold"></select>
           </div>
           <div class="flex justify-end pt-1">
-            <button onclick="saveEdit('${task.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer">שמור שינויים</button>
+            <button onclick="saveEdit('${task.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-extrabold cursor-pointer">שמור שינויים</button>
           </div>
         </div>
       `;
@@ -1127,8 +919,6 @@
       if (task.assignee === 'יוסי') badgeColor = 'bg-blue-50 text-blue-700 border-blue-100';
       if (task.assignee === 'אסתי') badgeColor = 'bg-rose-50 text-rose-700 border-rose-100';
 
-      const dateText = task.hebrewDateDisplay || task.hebrewDate || null;
-
       card.innerHTML = `
         <div class="flex items-center gap-3.5 flex-1 min-w-0">
           <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}')" class="w-5 h-5 text-indigo-600 rounded-md cursor-pointer accent-indigo-600 shrink-0">
@@ -1136,18 +926,17 @@
             <span class="text-xs sm:text-sm ${task.completed ? 'line-through text-slate-400' : 'text-slate-900'} font-bold block truncate">${task.title}</span>
             <div class="flex gap-1.5 mt-1.5 flex-wrap items-center">
               <span class="text-[10px] px-2.5 py-0.5 rounded-full font-extrabold border ${badgeColor}">${task.assignee}</span>
-              ${activeCategory === 'הכל' || activeCategory === '📅 עם תאריך' ? `<span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-extrabold border border-slate-200/80">🏷️ ${task.category}</span>` : ''}
-              ${dateText ? `<span class="text-[10px] px-2.5 py-0.5 rounded-full ${isToday ? 'bg-amber-100 text-amber-900 font-black border border-amber-300' : 'bg-indigo-50 text-indigo-700 border border-indigo-100'} font-extrabold">📅 ${dateText}</span>` : ''}
+              ${activeCategory === 'הכל' || activeCategory === '📅 עם תאריך' ? `<span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-extrabold border border-slate-200">🏷️ ${task.category}</span>` : ''}
+              ${task.hebrewDateDisplay ? `<span class="text-[10px] px-2.5 py-0.5 rounded-full ${isToday ? 'bg-amber-100 text-amber-900 font-black border border-amber-300' : 'bg-indigo-50 text-indigo-700 border border-indigo-100'} font-extrabold">📅 ${task.hebrewDateDisplay}</span>` : ''}
             </div>
           </div>
         </div>
         <div class="flex items-center gap-1 shrink-0 mr-2">
-          <button onclick="toggleEdit('${task.id}')" class="text-slate-400 hover:text-indigo-600 p-2 text-xs transition cursor-pointer" title="ערוך">✏️</button>
-          <button onclick="deleteTask('${task.id}')" class="text-slate-400 hover:text-rose-600 p-2 text-xs transition cursor-pointer" title="מחק">🗑️</button>
+          <button onclick="toggleEdit('${task.id}')" class="text-slate-400 hover:text-indigo-600 p-2 text-xs cursor-pointer" title="ערוך">✏️</button>
+          <button onclick="deleteTask('${task.id}')" class="text-slate-400 hover:text-rose-600 p-2 text-xs cursor-pointer" title="מחק">🗑️</button>
         </div>
       `;
     }
-
     return card;
   }
 
