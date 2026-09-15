@@ -11,6 +11,11 @@
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
   
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- ספריות Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background-color: #f3f4f6; }
   </style>
@@ -76,16 +81,36 @@
   <main id="tasks-container" class="space-y-3"></main>
 
 <script>
-  let tasks = JSON.parse(localStorage.getItem('my_tasks') || '[]');
+  // הגדרות Firebase - הזינו את הפרטים המדויקים מתוך הגדרות הפרויקט ב-Firebase
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let tasks = [];
   let activeCategory = 'הכל';
 
-  // הצגת תאריך נוכחי
   document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // הגדרת מאזין בזמן אמת לשינויים במסד הנתונים בענן
+  db.collection('tasks').onSnapshot((snapshot) => {
+    tasks = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    render();
+  });
 
   function toggleStoreInput() {
     const cat = document.getElementById('task-category').value;
-    const storeContainer = document.getElementById('store-input-container');
-    storeContainer.style.display = cat === 'קניות' ? 'block' : 'none';
+    document.getElementById('store-input-container').style.display = cat === 'קניות' ? 'block' : 'none';
   }
 
   function addTask() {
@@ -96,18 +121,15 @@
 
     if (!title) return alert('נא להזין תיאור משימה');
 
-    const newTask = {
-      id: Date.now(),
+    db.collection('tasks').add({
       title,
       category,
       assignee,
       store: category === 'קניות' ? store : null,
       completed: false,
-      isEditing: false
-    };
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-    tasks.push(newTask);
-    saveAndRender();
     document.getElementById('task-title').value = '';
     document.getElementById('task-store').value = '';
   }
@@ -123,14 +145,14 @@
     render();
   }
 
-  function toggleTask(id) {
-    tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
-    saveAndRender();
+  function toggleTask(id, currentStatus) {
+    db.collection('tasks').doc(id).update({
+      completed: !currentStatus
+    });
   }
 
   function deleteTask(id) {
-    tasks = tasks.filter(t => t.id !== id);
-    saveAndRender();
+    db.collection('tasks').doc(id).delete();
   }
 
   function toggleEdit(id) {
@@ -146,20 +168,11 @@
 
     if (!newTitle) return;
 
-    tasks = tasks.map(t => t.id === id ? {
-      ...t,
+    db.collection('tasks').doc(id).update({
       title: newTitle,
       assignee: newAssignee,
-      store: newStore,
-      isEditing: false
-    } : t);
-
-    saveAndRender();
-  }
-
-  function saveAndRender() {
-    localStorage.setItem('my_tasks', JSON.stringify(tasks));
-    render();
+      store: newStore
+    });
   }
 
   function render() {
@@ -175,7 +188,6 @@
       return;
     }
 
-    // אם אנחנו בקטגוריית קניות - מקבצים לפי חנות
     if (activeCategory === 'קניות') {
       const grouped = filtered.reduce((acc, task) => {
         const s = task.store || 'כללי';
@@ -212,14 +224,14 @@
             </select>
             ${task.category === 'קניות' ? `<input type="text" id="edit-store-${task.id}" value="${task.store || ''}" placeholder="חנות" class="p-1 border rounded-lg text-xs flex-1">` : ''}
           </div>
-          <button onclick="saveEdit(${task.id})" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold">שמור</button>
+          <button onclick="saveEdit('${task.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold">שמור</button>
         </div>
       `;
     } else {
       const badgeColor = task.assignee === 'יוסי' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700';
       card.innerHTML = `
         <div class="flex items-center gap-2.5 flex-1">
-          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})" class="w-4 h-4 text-indigo-600 rounded">
+          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}', ${task.completed})" class="w-4 h-4 text-indigo-600 rounded">
           <div>
             <span class="text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'} font-medium block">${task.title}</span>
             <div class="flex gap-1 mt-0.5">
@@ -229,8 +241,8 @@
           </div>
         </div>
         <div class="flex gap-1">
-          <button onclick="toggleEdit(${task.id})" class="text-gray-400 hover:text-indigo-600 p-1 text-xs">✏️</button>
-          <button onclick="deleteTask(${task.id})" class="text-gray-400 hover:text-red-600 p-1 text-xs">🗑️</button>
+          <button onclick="toggleEdit('${task.id}')" class="text-gray-400 hover:text-indigo-600 p-1 text-xs">✏️</button>
+          <button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-600 p-1 text-xs">🗑️</button>
         </div>
       `;
     }
@@ -239,9 +251,6 @@
   }
 
   function installPWA() {}
-
-  // רנדור ראשוני
-  render();
 </script>
 </body>
 </html>
