@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>המשימות שלנו v1.1.2</title>
+  <title>המשימות שלנו v1.1.3</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
 
-  <!-- אייקון מתוקן וישיר -->
   <link rel="apple-touch-icon" href="https://fav.farm/📋">
   <link rel="icon" href="https://fav.farm/📋">
 
-  <!-- מניפסט בסיסי ונקי -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=12","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"https://fav.farm/📋","sizes":"512x512","type":"image/png"}]}'>
+  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=13","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"https://fav.farm/📋","sizes":"512x512","type":"image/png"}]}'>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -31,7 +29,7 @@
 
   <!-- כותרת ראשית -->
   <header class="bg-white rounded-3xl p-5 shadow-xs border border-slate-200/60 text-center mb-4 relative">
-    <span class="absolute top-3 left-3 text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">v1.1.2</span>
+    <span class="absolute top-3 left-3 text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">v1.1.3</span>
     
     <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-md mb-2.5 text-white">
       📋
@@ -169,20 +167,30 @@
   <!-- רשימת המשימות -->
   <main id="tasks-container" class="space-y-3"></main>
 
-  <!-- מודאל הוראות שימוש -->
+  <!-- מודאל הוראות שימוש מעודכן -->
   <div id="instructions-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-xl space-y-4 max-h-[85vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">📖 הוראות שימוש והתקנה</h3>
+        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">📖 הוראות שימוש באפליקציה</h3>
         <button onclick="closeInstructionsModal()" class="text-slate-400 hover:text-slate-600 font-extrabold text-sm cursor-pointer">✕</button>
       </div>
 
       <div class="space-y-3 text-xs text-slate-600 leading-relaxed font-medium">
-        <div class="bg-indigo-50/70 p-3 rounded-2xl border border-indigo-100">
-          <strong class="text-indigo-900 block mb-1">📲 התקנה על מסך הבית:</strong>
-          1. לחץ על כפתור <b>"התקן אפליקציה"</b> או על <b>תפריט 3 הנקודות ⋮</b> בדפדפן הרגיל.<br>
-          2. בחר ב-<b>"התקן אפליקציה"</b> או <b>"הוסף למסך הבית"</b>.<br>
-          3. האייקון המעוצב יופיע במסך הבית שלך.
+        <div class="bg-indigo-50/70 p-3 rounded-2xl border border-indigo-100 space-y-2">
+          <strong class="text-indigo-900 block">✨ הוספת משימה:</strong>
+          • הזן תיאור, בחר קטגוריה ואחראי/ת.<br>
+          • ניתן לסמן תאריך עברי מדויק כדי שהמשימה תופיע אוטומטית בבאנר "משימות להיום".
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/70 space-y-2">
+          <strong class="text-slate-900 block">🗂️ ניהול קטגוריות ותתי-קטגוריות:</strong>
+          • אפשר להוסיף, לערוך או למחוק קטגוריות ותתי-קטגוריות (למשל חנויות ספציפיות לקניות) באמצעות כפתורי הקיצור הקטנים ליד השדות.
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/70 space-y-2">
+          <strong class="text-slate-900 block">👥 סינון וסנכרון משפחתי:</strong>
+          • השתמש בסרגלי הסינון כדי לראות משימות לפי קטגוריה או לפי אחראי/ת.<br>
+          • כל הנתונים מסתנכרנים אוטומטית בענן לפי קוד הקבוצה המוגדר בראש העמוד.
         </div>
       </div>
 
@@ -260,7 +268,7 @@
       if (outcome === 'accepted') deferredPrompt = null;
       return;
     }
-    alert('כדי להתקין את האפליקציה, לחץ על שלוש הנקודות ⋮ בדפדפן ובחר ב-"התקן אפליקציה" או "הוסף למסך הבית".');
+    alert('כדי להתקין את האפליקציה, לחץ על שלוש הנקודות ⋮ בדפדפן הרגיל ובחר ב-"התקן אפליקציה" או "הוסף למסך הבית".');
   }
 
   function openInstructionsModal() {
