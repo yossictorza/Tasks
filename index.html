@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>המשימות שלנו v1.0.9</title>
+  <title>המשימות שלנו v1.1.0</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
 
-  <!-- אייקון ומניפסט מעוצבים ללוגו במסך הבית -->
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%234f46e5'/><text x='50%' y='53%' dominant-baseline='middle' text-anchor='middle' font-size='240' fill='%23ffffff'>📋</text></svg>">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%234f46e5'/><text x='50%' y='53%' dominant-baseline='middle' text-anchor='middle' font-size='240' fill='%23ffffff'>📋</text></svg>">
 
-  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=9","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27><rect width=%27512%27 height=%27512%27 rx=%27110%27 fill=%27%234f46e5%27/><text x=%2750%%27 y=%2753%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27240%27 fill=%27%23ffffff%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=10","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27><rect width=%27512%27 height=%27512%27 rx=%27110%27 fill=%27%234f46e5%27/><text x=%2750%%27 y=%2753%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27240%27 fill=%27%23ffffff%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
   
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -31,9 +30,8 @@
 
   <!-- כותרת ראשית -->
   <header class="bg-white rounded-3xl p-5 shadow-xs border border-slate-200/60 text-center mb-4 relative">
-    <span class="absolute top-3 left-3 text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">v1.0.9</span>
+    <span class="absolute top-3 left-3 text-[10px] bg-indigo-50 text-indigo-700 font-extrabold px-2.5 py-1 rounded-full border border-indigo-100">v1.1.0</span>
     
-    <!-- לוגו ויזואלי בתוך האפליקציה -->
     <div class="w-16 h-16 bg-indigo-600 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-md mb-2.5 text-white">
       📋
     </div>
@@ -46,10 +44,15 @@
       <button onclick="switchUserGroup()" class="text-[11px] text-indigo-600 hover:text-indigo-800 underline font-extrabold transition mr-1">החלף</button>
     </div>
 
-    <!-- כפתור התקנה תמידי בראש העמוד -->
-    <button onclick="installPWA()" class="bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-extrabold px-4 py-3 rounded-2xl shadow-sm transition flex items-center justify-center gap-2 mx-auto w-full cursor-pointer">
-      📲 הוסף את האפליקציה למסך הבית
-    </button>
+    <!-- כפתורי פעולה בראש העמוד -->
+    <div class="grid grid-cols-2 gap-2 mt-1">
+      <button onclick="installPWA()" class="bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-extrabold p-3 rounded-2xl shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer">
+        📲 התקן אפליקציה
+      </button>
+      <button onclick="openInstructionsModal()" class="bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-700 text-xs font-extrabold p-3 rounded-2xl border border-slate-200/80 transition flex items-center justify-center gap-1.5 cursor-pointer">
+        📖 הוראות שימוש
+      </button>
+    </div>
   </header>
 
   <!-- באנר משימות להיום -->
@@ -166,7 +169,43 @@
   <!-- רשימת המשימות -->
   <main id="tasks-container" class="space-y-3"></main>
 
-  <!-- מודאל הדרכה להתקנה -->
+  <!-- מודאל הוראות שימוש -->
+  <div id="instructions-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-xl space-y-4 max-h-[85vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">📖 הוראות שימוש והתקנה</h3>
+        <button onclick="closeInstructionsModal()" class="text-slate-400 hover:text-slate-600 font-extrabold text-sm cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-600 leading-relaxed font-medium">
+        <div class="bg-indigo-50/70 p-3 rounded-2xl border border-indigo-100">
+          <strong class="text-indigo-900 block mb-1">📲 התקנה על מסך הבית (אנדרואיד / כרום):</strong>
+          1. לחץ על כפתור <b>"התקן אפליקציה"</b> או על <b>תפריט 3 הנקודות ⋮</b> בדפדפן.<br>
+          2. בחר ב-<b>"התקן אפליקציה"</b> או <b>"הוסף למסך הבית"</b>.<br>
+          3. האייקון המעוצב יופיע במסך הבית שלך כאפליקציה לכל דבר.
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
+          <strong class="text-slate-800 block mb-1">🔑 שיתוף משפחתי (קוד משפחה):</strong>
+          האפליקציה מסתנכרנת בענן לפי קוד משפחה. כדי ששני מכשירים יראו את אותן משימות, ודא ששניהם מגדירים את אותו קוד דרך כפתור ה<b>"החלף"</b> שליד שם החשבון בראש העמוד.
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
+          <strong class="text-slate-800 block mb-1">📅 תאריכים עבריים ומשימות להיום:</strong>
+          ניתן להוסיף תאריך עברי לכל משימה. משימות שתאריכן חל היום יופיעו באופן אוטומטי ב<b>באנר המיוחד בראש העמוד</b> כדי שלא תפספסו כלום!
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60">
+          <strong class="text-slate-800 block mb-1">✏️ ניהול קטגוריות ואחראים:</strong>
+          ליד כל שורת בחירה (קטגוריה או אחראי) יש לחצני <b>+ הוסף</b>, <b>✏️ ערוך</b> ו-<b>🗑️ מחק</b> שמאפשרים לך להתאים אישית את הרשימות בכל רגע.
+        </div>
+      </div>
+
+      <button onclick="closeInstructionsModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3 rounded-2xl text-xs transition cursor-pointer">הבנתי, תודה!</button>
+    </div>
+  </div>
+
+  <!-- מודאל התקנה רגיל -->
   <div id="install-modal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-xl space-y-4 text-center">
       <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl mx-auto flex items-center justify-center text-2xl shadow">📋</div>
@@ -228,7 +267,6 @@
   </div>
 
 <script>
-  // רישום Service Worker אוטומטי שמאפשר לכרום להכיר באפליקציה כ-PWA תקין
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swCode = `self.addEventListener('fetch', (e) => {});`;
@@ -246,7 +284,6 @@
   });
 
   async function installPWA() {
-    // אם הדפדפן באנדרואיד קלט את אירוע ההתקנה, נפעיל אותו מיד
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
@@ -256,7 +293,6 @@
       return;
     }
 
-    // אם האירוע טרם התחבר, נציג מדריך קצר המכוון לתפריט כרום באנדרואיד
     const modal = document.getElementById('install-modal');
     const textElem = document.getElementById('install-instructions-text');
 
@@ -266,6 +302,14 @@
 
   function closeInstallModal() {
     document.getElementById('install-modal').classList.add('hidden');
+  }
+
+  function openInstructionsModal() {
+    document.getElementById('instructions-modal').classList.remove('hidden');
+  }
+
+  function closeInstructionsModal() {
+    document.getElementById('instructions-modal').classList.add('hidden');
   }
 
   const firebaseConfig = {
