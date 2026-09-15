@@ -62,14 +62,14 @@
 
       <!-- מתג הפעלת תאריך עברי -->
       <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200 space-y-2">
-        <div class="flex items-center justify-between cursor-pointer" onclick="toggleTaskDateSwitch()">
+        <label class="flex items-center justify-between cursor-pointer">
           <span class="text-xs font-bold text-gray-700 flex items-center gap-1.5">
             📅 הגדר תאריך עברי למשימה
           </span>
           <input type="checkbox" id="task-enable-date" onchange="onDateSwitchChange()" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
-        </div>
+        </label>
 
-        <!-- בחירת תאריך עברי (מוסתר כברירת מחדל, נפתח עם תאריך היום) -->
+        <!-- בחירת תאריך עברי -->
         <div id="task-date-picker-box" class="hidden grid grid-cols-3 gap-1.5 pt-1 border-t border-gray-200/60">
           <div>
             <label class="block text-[10px] text-gray-400 mb-0.5">יום</label>
@@ -105,6 +105,7 @@
 
   <!-- סרגלי סינון -->
   <div class="space-y-2 mb-4">
+    <!-- סרגל קטגוריות ראשיות -->
     <div class="flex gap-1.5 overflow-x-auto pb-1">
       <button onclick="setCategoryFilter('הכל', this)" class="cat-filter-btn active bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm whitespace-nowrap">הכל</button>
       <button onclick="setCategoryFilter('📅 עם תאריך', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">📅 עם תאריך</button>
@@ -113,6 +114,7 @@
       <button onclick="setCategoryFilter('תזכורות', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">⏰ תזכורות</button>
     </div>
 
+    <!-- סרגל אחראי -->
     <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
       <span class="text-xs text-gray-400 pl-1 font-medium whitespace-nowrap">אחראי:</span>
       <button onclick="setAssigneeFilter('הכל', this)" class="ass-filter-btn active bg-gray-700 text-white px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">הכל</button>
@@ -120,13 +122,18 @@
       <button onclick="setAssigneeFilter('יוסי', this)" class="ass-filter-btn bg-white text-gray-600 border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">👨 יוסי</button>
       <button onclick="setAssigneeFilter('אסתי', this)" class="ass-filter-btn bg-white text-gray-600 border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">👩 אסתי</button>
     </div>
+
+    <!-- סרגל תת-קטגוריות (נוסף חדש!) -->
+    <div id="subcategory-filter-bar" class="hidden flex items-center gap-1.5 overflow-x-auto pb-1">
+      <span class="text-xs text-gray-400 pl-1 font-medium whitespace-nowrap">תת-קטגוריה:</span>
+      <div id="subcategory-filter-buttons" class="flex gap-1.5 overflow-x-auto"></div>
+    </div>
   </div>
 
   <!-- רשימת המשימות -->
   <main id="tasks-container" class="space-y-3"></main>
 
 <script>
-  // רשימות עבריות
   const HEBREW_DAYS_LIST = [
     "", "א'", "ב'", "ג'", "ד'", "ה'", "ו'", "ז'", "ח'", "ט'", "י'",
     'י"א', 'י"ב', 'י"ג', 'י"ד', 'ט"ו', 'ט"ז', 'י"ז', 'י"ח', 'י"ט', "כ'",
@@ -189,22 +196,17 @@
 
   const todayHeb = getTodayHebrewData();
 
-  // טעינה בטוחה של נתונים ושמירה על מידע קיים
   let rawTasks = JSON.parse(localStorage.getItem('app_tasks')) || [];
-  let tasks = rawTasks.map(t => {
-    // שמירה על הערות/תאריכים ישנים שנוצרו בגרסאות קודמות
-    let hebDisplay = t.hebrewDateDisplay || t.hebrewDate || null;
-    let sortKey = t.hebrewSortKey || null;
-    return {
-      ...t,
-      hebrewDateDisplay: hebDisplay,
-      hebrewSortKey: sortKey
-    };
-  });
+  let tasks = rawTasks.map(t => ({
+    ...t,
+    hebrewDateDisplay: t.hebrewDateDisplay || t.hebrewDate || null,
+    hebrewSortKey: t.hebrewSortKey || null
+  }));
 
   let subcategories = JSON.parse(localStorage.getItem('app_subcategories')) || [];
   let activeCategory = 'הכל';
   let activeAssignee = 'הכל';
+  let activeSubcategory = 'הכל';
 
   function saveData() {
     localStorage.setItem('app_tasks', JSON.stringify(tasks));
@@ -254,12 +256,6 @@
     }
   }
 
-  function toggleTaskDateSwitch() {
-    const chk = document.getElementById('task-enable-date');
-    chk.checked = !chk.checked;
-    onDateSwitchChange();
-  }
-
   function onDateSwitchChange() {
     const chk = document.getElementById('task-enable-date');
     const box = document.getElementById('task-date-picker-box');
@@ -289,6 +285,54 @@
     });
   }
 
+  function updateSubcategoryFilterBar() {
+    const barBox = document.getElementById('subcategory-filter-bar');
+    const buttonsBox = document.getElementById('subcategory-filter-buttons');
+    if (!barBox || !buttonsBox) return;
+
+    let relevantSubs = [];
+    if (activeCategory === 'הכל' || activeCategory === '📅 עם תאריך') {
+      relevantSubs = subcategories;
+    } else {
+      relevantSubs = subcategories.filter(s => s.parentCategory === activeCategory);
+    }
+
+    if (relevantSubs.length === 0) {
+      barBox.classList.add('hidden');
+      activeSubcategory = 'הכל';
+      return;
+    }
+
+    barBox.classList.remove('hidden');
+    buttonsBox.innerHTML = '';
+
+    // כפתור הכל
+    const allBtn = document.createElement('button');
+    const isAllActive = activeSubcategory === 'הכל';
+    allBtn.className = `sub-filter-btn ${isAllActive ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200'} px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition`;
+    allBtn.innerText = 'הכל';
+    allBtn.onclick = () => {
+      activeSubcategory = 'הכל';
+      updateSubcategoryFilterBar();
+      render();
+    };
+    buttonsBox.appendChild(allBtn);
+
+    // כפתור לכל תת-קטגוריה
+    relevantSubs.forEach(s => {
+      const btn = document.createElement('button');
+      const isActive = activeSubcategory === s.name;
+      btn.className = `sub-filter-btn ${isActive ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200'} px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition`;
+      btn.innerText = s.name;
+      btn.onclick = () => {
+        activeSubcategory = s.name;
+        updateSubcategoryFilterBar();
+        render();
+      };
+      buttonsBox.appendChild(btn);
+    });
+  }
+
   function promptNewSubcategory() {
     const parentCategory = document.getElementById('task-category').value;
     const name = prompt(`הזן שם לתת-קטגוריה / חנות חדשה עבור "${parentCategory}":`);
@@ -301,6 +345,7 @@
     });
     saveData();
     updateSubcategoryDropdown();
+    updateSubcategoryFilterBar();
     render();
   }
 
@@ -308,8 +353,10 @@
     if (confirm(`האם למחוק את תת-הקטגוריה "${subName}"? כל המשימות בתוכה יימחקו!`)) {
       subcategories = subcategories.filter(s => s.id !== subId);
       tasks = tasks.filter(t => !(t.category === parentCat && t.subcategory === subName));
+      if (activeSubcategory === subName) activeSubcategory = 'הכל';
       saveData();
       updateSubcategoryDropdown();
+      updateSubcategoryFilterBar();
       render();
     }
   }
@@ -355,17 +402,20 @@
     document.getElementById('task-title').value = '';
     document.getElementById('task-enable-date').checked = false;
     document.getElementById('task-date-picker-box').classList.add('hidden');
+    updateSubcategoryFilterBar();
     render();
   }
 
   function setCategoryFilter(cat, btn) {
     activeCategory = cat;
+    activeSubcategory = 'הכל';
     document.querySelectorAll('.cat-filter-btn').forEach(b => {
       b.classList.remove('bg-indigo-600', 'text-white');
       b.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
     });
     btn.classList.remove('bg-white', 'text-gray-600', 'border');
     btn.classList.add('bg-indigo-600', 'text-white');
+    updateSubcategoryFilterBar();
     render();
   }
 
@@ -489,7 +539,7 @@
       item.className = 'flex items-center justify-between text-xs font-semibold text-amber-900 bg-white/80 p-2 rounded-lg border border-amber-200/60';
       item.innerHTML = `
         <div class="flex items-center gap-2">
-          <input type="checkbox" onclick="toggleTask('${t.id}')" class="w-3.5 h-3.5 text-amber-600 rounded">
+          <input type="checkbox" onclick="toggleTask('${t.id}')" class="w-3.5 h-3.5 text-amber-600 rounded cursor-pointer">
           <span>${t.title}</span>
         </div>
         <span class="text-[10px] bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded font-bold">${t.assignee}</span>
@@ -515,7 +565,9 @@
       }
 
       const matchAss = activeAssignee === 'הכל' || t.assignee === activeAssignee;
-      return matchCat && matchAss;
+      const matchSub = activeSubcategory === 'הכל' || t.subcategory === activeSubcategory;
+
+      return matchCat && matchAss && matchSub;
     });
 
     filtered = sortTasks(filtered);
@@ -525,6 +577,13 @@
       return;
     }
 
+    // אם נבחרה תת-קטגוריה ספציפית
+    if (activeSubcategory !== 'הכל') {
+      filtered.forEach(task => container.appendChild(createTaskCard(task)));
+      return;
+    }
+
+    // תצוגה כללית מקובצת
     const generalTasks = filtered.filter(t => !t.subcategory || t.subcategory === 'כללי');
     if (generalTasks.length > 0) {
       if (activeCategory !== 'הכל' && activeCategory !== '📅 עם תאריך') {
@@ -581,7 +640,7 @@
             </select>
             <div class="flex items-center gap-1">
               <input type="checkbox" id="edit-enable-date-${task.id}" onchange="onEditDateSwitchChange('${task.id}')">
-              <label for="edit-enable-date-${task.id}" class="text-xs text-gray-600">משוייך לתאריך</label>
+              <label for="edit-enable-date-${task.id}" class="text-xs text-gray-600 cursor-pointer">משוייך לתאריך</label>
             </div>
           </div>
           <div id="edit-date-box-${task.id}" class="hidden grid grid-cols-3 gap-1">
@@ -601,7 +660,7 @@
 
       card.innerHTML = `
         <div class="flex items-center gap-2.5 flex-1">
-          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}')" class="w-4 h-4 text-indigo-600 rounded">
+          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}')" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
           <div>
             <span class="text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'} font-medium block">${task.title}</span>
             <div class="flex gap-1 mt-0.5 flex-wrap">
@@ -622,6 +681,7 @@
   }
 
   updateSubcategoryDropdown();
+  updateSubcategoryFilterBar();
   render();
 </script>
 </body>
