@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>המשימות שלנו v1.0.4</title>
+  <title>המשימות שלנו v1.0.5</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
 
-  <!-- לוגו ואייקון מותאם אישית למסך הבית (SVG ברזולוציה גבוהה) -->
+  <!-- לוגו ואייקון מותאם אישית למסך הבית -->
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
 
   <!-- הגדרות אפליקציה להתקנה (PWA Manifest) -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=4","display":"standalone","background_color":"%23ffffff","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27300%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=5","display":"standalone","background_color":"%23f8fafc","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27300%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
   
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -24,97 +24,101 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background-color: #f3f4f6; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f8fafc; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="max-w-md mx-auto p-4 min-h-screen pb-20">
+<body class="max-w-md mx-auto p-4 min-h-screen pb-24 text-slate-800">
 
   <!-- כותרת ותאריך -->
-  <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4 relative">
-    <span class="absolute top-2 left-3 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v1.0.4</span>
-    <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו 📋</h1>
-    <div id="current-date" class="text-xs font-bold text-indigo-600 mb-2"></div>
+  <header class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 text-center mb-5 relative">
+    <span class="absolute top-3 left-3 text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-100">v1.0.5</span>
+    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight mb-1">המשימות שלנו 📋</h1>
+    <div id="current-date" class="text-xs font-semibold text-indigo-600 mb-3"></div>
     
     <!-- מחוון חשבון / קוד משפחתי -->
-    <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-800 text-xs px-3 py-1 rounded-full font-bold mb-2">
-      <span>🔑 חשבון: <strong id="display-group-name">...</strong></span>
-      <button onclick="switchUserGroup()" class="text-[10px] text-indigo-600 underline hover:text-indigo-900">החלף</button>
+    <div class="inline-flex items-center gap-2 bg-slate-50 border border-slate-200/80 text-slate-700 text-xs px-3.5 py-1.5 rounded-full font-bold">
+      <span>🔑 חשבון: <strong id="display-group-name" class="text-indigo-600">...</strong></span>
+      <button onclick="switchUserGroup()" class="text-[11px] text-indigo-600 hover:text-indigo-800 underline font-semibold transition">החלף</button>
     </div>
 
     <!-- כפתור להתקנת האפליקציה למסך הבית -->
-    <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto w-full cursor-pointer mt-1">
+    <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-sm transition flex items-center justify-center gap-2 mx-auto w-full cursor-pointer mt-3">
       📲 התקן את האפליקציה למכשיר
     </button>
   </header>
 
   <!-- באנר משימות להיום -->
-  <div id="today-banner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3.5 mb-4 shadow-sm">
-    <div class="flex items-center justify-between mb-2">
-      <span class="text-xs font-bold text-amber-900 flex items-center gap-1">
+  <div id="today-banner" class="hidden bg-amber-50/90 border border-amber-200/80 rounded-3xl p-4 mb-5 shadow-sm">
+    <div class="flex items-center justify-between mb-2.5">
+      <span class="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
         ⭐ משימות להיום (<span id="today-date-text"></span>)
       </span>
-      <span id="today-count" class="text-[10px] bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full font-bold">0</span>
+      <span id="today-count" class="text-[11px] bg-amber-200/80 text-amber-900 px-2.5 py-0.5 rounded-full font-bold">0</span>
     </div>
-    <div id="today-tasks-list" class="space-y-1.5"></div>
+    <div id="today-tasks-list" class="space-y-2"></div>
   </div>
 
   <!-- טופס הוספת משימה -->
-  <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
-    <h2 class="text-base font-bold text-gray-700 mb-3">➕ הוספת משימה חדשה</h2>
+  <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 mb-5">
+    <h2 class="text-sm font-bold text-slate-800 mb-3.5 flex items-center gap-1.5">
+      <span>➕</span> הוספת משימה חדשה
+    </h2>
     
-    <div class="space-y-3">
-      <input type="text" id="task-title" placeholder="מה צריך לעשות / לקנות?" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
+    <div class="space-y-3.5">
+      <input type="text" id="task-title" placeholder="מה צריך לעשות / לקנות?" class="w-full p-3 border border-slate-200 rounded-2xl text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition bg-slate-50/50">
       
-      <div class="grid grid-cols-2 gap-2">
+      <div class="grid grid-cols-2 gap-3">
         <!-- קטגוריה ראשית -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs text-gray-500">קטגוריה ראשית</label>
-            <div class="flex gap-1 text-[10px]">
+            <label class="block text-[11px] font-medium text-slate-500">קטגוריה ראשית</label>
+            <div class="flex gap-1.5 text-[10px]">
               <button type="button" onclick="openAddModal('category')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
               <button type="button" onclick="openEditModal('category')" class="text-amber-600 font-bold hover:underline">✏️</button>
-              <button type="button" onclick="openDeleteModal('category')" class="text-red-500 font-bold hover:underline">🗑️</button>
+              <button type="button" onclick="openDeleteModal('category')" class="text-rose-500 font-bold hover:underline">🗑️</button>
             </div>
           </div>
-          <select id="task-category" onchange="onCategorySelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
+          <select id="task-category" onchange="onCategorySelectChange()" class="w-full p-2.5 border border-slate-200 rounded-2xl bg-slate-50/50 text-xs font-medium text-slate-700 outline-none focus:border-indigo-500"></select>
         </div>
 
         <!-- אחראי/ת -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs text-gray-500">אחראי/ת</label>
-            <div class="flex gap-1 text-[10px]">
+            <label class="block text-[11px] font-medium text-slate-500">אחראי/ת</label>
+            <div class="flex gap-1.5 text-[10px]">
               <button type="button" onclick="openAddModal('assignee')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
               <button type="button" onclick="openEditModal('assignee')" class="text-amber-600 font-bold hover:underline">✏️</button>
-              <button type="button" onclick="openDeleteModal('assignee')" class="text-red-500 font-bold hover:underline">🗑️</button>
+              <button type="button" onclick="openDeleteModal('assignee')" class="text-rose-500 font-bold hover:underline">🗑️</button>
             </div>
           </div>
-          <select id="task-assignee" onchange="onAssigneeSelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
+          <select id="task-assignee" onchange="onAssigneeSelectChange()" class="w-full p-2.5 border border-slate-200 rounded-2xl bg-slate-50/50 text-xs font-medium text-slate-700 outline-none focus:border-indigo-500"></select>
         </div>
       </div>
 
       <!-- מתג הפעלת תאריך עברי -->
-      <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200 space-y-2">
+      <div class="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/80 space-y-2.5">
         <label class="flex items-center justify-between cursor-pointer">
-          <span class="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+          <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
             📅 הגדר תאריך עברי למשימה
           </span>
-          <input type="checkbox" id="task-enable-date" onchange="onDateSwitchChange()" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
+          <input type="checkbox" id="task-enable-date" onchange="onDateSwitchChange()" class="w-4 h-4 text-indigo-600 rounded-md cursor-pointer accent-indigo-600">
         </label>
 
         <!-- בחירת תאריך עברי -->
-        <div id="task-date-picker-box" class="hidden grid grid-cols-3 gap-1.5 pt-1 border-t border-gray-200/60">
+        <div id="task-date-picker-box" class="hidden grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/70">
           <div>
-            <label class="block text-[10px] text-gray-400 mb-0.5">יום</label>
-            <select id="task-heb-day" class="w-full p-1.5 border border-gray-200 rounded-lg bg-white text-xs"></select>
+            <label class="block text-[10px] font-medium text-slate-400 mb-1">יום</label>
+            <select id="task-heb-day" class="w-full p-2 border border-slate-200 rounded-xl bg-white text-xs"></select>
           </div>
           <div>
-            <label class="block text-[10px] text-gray-400 mb-0.5">חודש</label>
-            <select id="task-heb-month" class="w-full p-1.5 border border-gray-200 rounded-lg bg-white text-xs"></select>
+            <label class="block text-[10px] font-medium text-slate-400 mb-1">חודש</label>
+            <select id="task-heb-month" class="w-full p-2 border border-slate-200 rounded-xl bg-white text-xs"></select>
           </div>
           <div>
-            <label class="block text-[10px] text-gray-400 mb-0.5">שנה</label>
-            <select id="task-heb-year" class="w-full p-1.5 border border-gray-200 rounded-lg bg-white text-xs"></select>
+            <label class="block text-[10px] font-medium text-slate-400 mb-1">שנה</label>
+            <select id="task-heb-year" class="w-full p-2 border border-slate-200 rounded-xl bg-white text-xs"></select>
           </div>
         </div>
       </div>
@@ -122,29 +126,29 @@
       <!-- קטגוריה / חנות -->
       <div>
         <div class="flex justify-between items-center mb-1">
-          <label class="block text-xs text-gray-500">קטגוריה / חנות (רשות)</label>
-          <div class="flex gap-1 text-[10px]">
+          <label class="block text-[11px] font-medium text-slate-500">קטגוריה / חנות (רשות)</label>
+          <div class="flex gap-1.5 text-[10px]">
             <button type="button" onclick="openAddModal('subcategory')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
             <button type="button" onclick="openEditModal('subcategory')" class="text-amber-600 font-bold hover:underline">✏️</button>
-            <button type="button" onclick="openDeleteModal('subcategory')" class="text-red-500 font-bold hover:underline">🗑️</button>
+            <button type="button" onclick="openDeleteModal('subcategory')" class="text-rose-500 font-bold hover:underline">🗑️</button>
           </div>
         </div>
-        <select id="task-subcategory" onchange="onSubcategorySelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
+        <select id="task-subcategory" onchange="onSubcategorySelectChange()" class="w-full p-2.5 border border-slate-200 rounded-2xl bg-slate-50/50 text-xs font-medium text-slate-700 outline-none focus:border-indigo-500"></select>
       </div>
 
-      <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+      <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-bold py-3 rounded-2xl text-sm transition shadow-sm cursor-pointer">
         הוסף משימה
       </button>
     </div>
   </section>
 
   <!-- סרגלי סינון -->
-  <div class="space-y-2 mb-4">
-    <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="category-filter-bar"></div>
-    <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="assignee-filter-bar"></div>
-    <div id="subcategory-filter-bar" class="hidden flex items-center gap-1.5 overflow-x-auto pb-1">
-      <span class="text-xs text-gray-400 pl-1 font-medium whitespace-nowrap">קטגוריה:</span>
-      <div id="subcategory-filter-buttons" class="flex gap-1.5 overflow-x-auto"></div>
+  <div class="space-y-2 mb-5">
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar" id="category-filter-bar"></div>
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar" id="assignee-filter-bar"></div>
+    <div id="subcategory-filter-bar" class="hidden flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+      <span class="text-xs text-slate-400 pl-1 font-medium whitespace-nowrap">קטגוריה:</span>
+      <div id="subcategory-filter-buttons" class="flex gap-2 overflow-x-auto no-scrollbar"></div>
     </div>
   </div>
 
@@ -152,52 +156,52 @@
   <main id="tasks-container" class="space-y-3"></main>
 
   <!-- מודאל הוספה -->
-  <div id="add-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
-      <h3 id="add-modal-title" class="text-sm font-bold text-gray-800"></h3>
+  <div id="add-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-xl space-y-4">
+      <h3 id="add-modal-title" class="text-sm font-bold text-slate-800"></h3>
       <div>
-        <label class="block text-xs text-gray-500 mb-1">בחר אימוג'י להצעה:</label>
-        <div id="emoji-picker" class="flex flex-wrap gap-1.5 p-2 bg-gray-50 rounded-xl border border-gray-100 max-h-28 overflow-y-auto"></div>
+        <label class="block text-xs font-medium text-slate-500 mb-1.5">בחר אימוג'י להצעה:</label>
+        <div id="emoji-picker" class="flex flex-wrap gap-2 p-2.5 bg-slate-50 rounded-2xl border border-slate-100 max-h-28 overflow-y-auto"></div>
       </div>
       <div>
-        <label class="block text-xs text-gray-500 mb-1">שם:</label>
-        <input type="text" id="add-modal-input" class="w-full p-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
+        <label class="block text-xs font-medium text-slate-500 mb-1.5">שם:</label>
+        <input type="text" id="add-modal-input" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500">
       </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeAddModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">ביטול</button>
-        <button onclick="confirmAddModal()" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-xl">אישור</button>
+      <div class="flex justify-end gap-2 pt-1">
+        <button onclick="closeAddModal()" class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition">ביטול</button>
+        <button onclick="confirmAddModal()" class="px-5 py-2 text-xs font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition">אישור</button>
       </div>
     </div>
   </div>
 
   <!-- מודאל עריכת קטגוריות / אחראים -->
-  <div id="edit-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
-      <div class="flex justify-between items-center border-b pb-2">
-        <h3 id="edit-modal-title" class="text-sm font-bold text-gray-800">עריכת פריטים:</h3>
-        <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
+  <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="edit-modal-title" class="text-sm font-bold text-slate-800">עריכת פריטים:</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
       </div>
       
       <div id="edit-modal-list" class="space-y-2 max-h-60 overflow-y-auto pt-1"></div>
 
-      <div class="flex justify-end pt-2 border-t border-gray-100">
-        <button onclick="closeEditModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">סגור</button>
+      <div class="flex justify-end pt-2 border-t border-slate-100">
+        <button onclick="closeEditModal()" class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition">סגור</button>
       </div>
     </div>
   </div>
 
   <!-- מודאל מחיקה -->
-  <div id="delete-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
-      <div class="flex justify-between items-center border-b pb-2">
-        <h3 id="delete-modal-title" class="text-sm font-bold text-gray-800">לחץ על מה שברצונך למחוק:</h3>
-        <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm">✕</button>
+  <div id="delete-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="delete-modal-title" class="text-sm font-bold text-slate-800">לחץ על מה שברצונך למחוק:</h3>
+        <button onclick="closeDeleteModal()" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
       </div>
       
-      <div id="delete-modal-list" class="space-y-1.5 max-h-60 overflow-y-auto pt-1"></div>
+      <div id="delete-modal-list" class="space-y-2 max-h-60 overflow-y-auto pt-1"></div>
 
-      <div class="flex justify-end pt-2 border-t border-gray-100">
-        <button onclick="closeDeleteModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">סגור</button>
+      <div class="flex justify-end pt-2 border-t border-slate-100">
+        <button onclick="closeDeleteModal()" class="px-4 py-2 text-xs font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition">סגור</button>
       </div>
     </div>
   </div>
@@ -447,7 +451,7 @@
     emojis.forEach(emoji => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'text-lg p-1.5 hover:bg-gray-200 rounded-lg transition cursor-pointer';
+      btn.className = 'text-lg p-2 hover:bg-slate-200/60 rounded-xl transition cursor-pointer';
       btn.innerText = emoji;
       btn.onclick = () => {
         if (!input.value.startsWith(emoji)) {
@@ -520,21 +524,21 @@
     const items = Array.from(itemsSet);
 
     if (items.length === 0) {
-      list.innerHTML = '<div class="text-xs text-gray-400 p-2 text-center">אין פריטים קיימים לעריכה</div>';
+      list.innerHTML = '<div class="text-xs text-slate-400 p-2 text-center">אין פריטים קיימים לעריכה</div>';
     } else {
       items.forEach((oldName, idx) => {
         const itemRow = document.createElement('div');
-        itemRow.className = 'flex items-center gap-1.5 p-1.5 bg-amber-50/50 rounded-xl border border-amber-100';
+        itemRow.className = 'flex items-center gap-2 p-2 bg-slate-50 rounded-2xl border border-slate-100';
         
         const input = document.createElement('input');
         input.type = 'text';
         input.id = `edit-item-input-${idx}`;
         input.value = oldName;
-        input.className = 'flex-1 p-1.5 text-xs border border-gray-200 rounded-lg outline-none focus:border-indigo-500 bg-white';
+        input.className = 'flex-1 p-2 text-xs border border-slate-200 rounded-xl outline-none focus:border-indigo-500 bg-white';
 
         const saveBtn = document.createElement('button');
         saveBtn.type = 'button';
-        saveBtn.className = 'bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg transition whitespace-nowrap cursor-pointer';
+        saveBtn.className = 'bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition whitespace-nowrap cursor-pointer';
         saveBtn.innerText = 'שמור';
         saveBtn.onclick = () => renameItem(type, oldName, input.value.trim());
 
@@ -603,13 +607,13 @@
     const items = Array.from(itemsSet);
 
     if (items.length === 0) {
-      list.innerHTML = '<div class="text-xs text-gray-400 p-2 text-center">אין פריטים ברשימה למחיקה</div>';
+      list.innerHTML = '<div class="text-xs text-slate-400 p-2 text-center">אין פריטים ברשימה למחיקה</div>';
     } else {
       items.forEach(itemName => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'w-full flex justify-between items-center p-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-100 text-red-700 text-xs font-bold transition text-right cursor-pointer';
-        btn.innerHTML = `<span>${itemName}</span><span class="text-red-500 font-normal">🗑️ מחק</span>`;
+        btn.className = 'w-full flex justify-between items-center p-3 rounded-2xl bg-rose-50/80 hover:bg-rose-100 border border-rose-100 text-rose-700 text-xs font-bold transition text-right cursor-pointer';
+        btn.innerHTML = `<span>${itemName}</span><span class="text-rose-500 font-normal">🗑️ מחק</span>`;
         btn.onclick = () => deleteItemFromModal(type, itemName);
         list.appendChild(btn);
       });
@@ -738,7 +742,7 @@
     bar.innerHTML = '';
 
     const label = document.createElement('span');
-    label.className = 'text-xs text-gray-400 pl-1 font-medium whitespace-nowrap';
+    label.className = 'text-xs text-slate-400 pl-1 font-medium whitespace-nowrap';
     label.innerText = 'אחראי:';
     bar.appendChild(label);
 
@@ -788,9 +792,9 @@
   function createFilterButton(text, isActive, onClick, type='cat') {
     const btn = document.createElement('button');
     let activeClasses = 'bg-indigo-600 text-white shadow-sm';
-    if (type === 'ass') activeClasses = 'bg-gray-700 text-white';
+    if (type === 'ass') activeClasses = 'bg-slate-800 text-white shadow-sm';
 
-    btn.className = `${isActive ? activeClasses : 'bg-white text-gray-600 border border-gray-200'} px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer`;
+    btn.className = `${isActive ? activeClasses : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'} px-3.5 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition cursor-pointer`;
     btn.innerText = text;
     btn.onclick = onClick;
     return btn;
@@ -915,11 +919,9 @@
   // מיון משימות: משימות שלא בוצעו תמיד למעלה, משימות שבוצעו יורדות למטה
   function sortTasks(taskList) {
     return taskList.sort((a, b) => {
-      // קודם כל מיון לפי מצב ביצוע (לא בוצע למעלה, בוצע למטה)
       if (a.completed !== b.completed) {
         return a.completed ? 1 : -1;
       }
-      // משני: מיון לפי תאריך עברי
       if (a.hebrewSortKey && b.hebrewSortKey) return a.hebrewSortKey - b.hebrewSortKey;
       if (a.hebrewSortKey && !b.hebrewSortKey) return -1;
       if (!a.hebrewSortKey && b.hebrewSortKey) return 1;
@@ -947,13 +949,13 @@
 
     todayTasks.forEach(t => {
       const item = document.createElement('div');
-      item.className = 'flex items-center justify-between text-xs font-semibold text-amber-900 bg-white/80 p-2 rounded-lg border border-amber-200/60';
+      item.className = 'flex items-center justify-between text-xs font-semibold text-amber-950 bg-white/90 p-2.5 rounded-2xl border border-amber-200/80 shadow-2xs';
       item.innerHTML = `
-        <div class="flex items-center gap-2">
-          <input type="checkbox" onclick="toggleTask('${t.id}')" class="w-3.5 h-3.5 text-amber-600 rounded cursor-pointer">
+        <div class="flex items-center gap-2.5">
+          <input type="checkbox" onclick="toggleTask('${t.id}')" class="w-4 h-4 text-amber-600 rounded cursor-pointer accent-amber-600">
           <span>${t.title}</span>
         </div>
-        <span class="text-[10px] bg-amber-200 text-amber-800 px-1.5 py-0.5 rounded font-bold">${t.assignee}</span>
+        <span class="text-[10px] bg-amber-100/80 text-amber-900 px-2 py-0.5 rounded-full font-bold">${t.assignee}</span>
       `;
       todayList.appendChild(item);
     });
@@ -980,7 +982,7 @@
     filtered = sortTasks(filtered);
 
     if (filtered.length === 0) {
-      container.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">אין משימות להצגה</div>';
+      container.innerHTML = '<div class="text-center text-slate-400 py-10 text-sm font-medium">אין משימות להצגה</div>';
       return;
     }
 
@@ -993,7 +995,7 @@
     if (generalTasks.length > 0) {
       if (activeCategory !== 'הכל' && activeCategory !== '📅 עם תאריך') {
         const genHeader = document.createElement('div');
-        genHeader.className = 'text-xs font-bold text-gray-500 mb-1 px-1';
+        genHeader.className = 'text-xs font-bold text-slate-400 mb-1.5 px-1';
         genHeader.innerText = '📌 משימות כלליות';
         container.appendChild(genHeader);
       }
@@ -1011,11 +1013,11 @@
       const [catName, subName] = groupKey.split('___');
 
       const groupCard = document.createElement('div');
-      groupCard.className = 'bg-gray-50 p-3 rounded-2xl border border-gray-200 space-y-2 mt-2';
+      groupCard.className = 'bg-slate-100/70 p-3.5 rounded-3xl border border-slate-200/60 space-y-2 mt-3';
 
       const header = document.createElement('div');
-      header.className = 'flex justify-between items-center mb-1';
-      header.innerHTML = `<span class="text-xs font-bold text-gray-700">📂 ${subName} ${activeCategory === 'הכל' ? `(${catName})` : ''}</span>`;
+      header.className = 'flex justify-between items-center mb-1 px-1';
+      header.innerHTML = `<span class="text-xs font-bold text-slate-700">📂 ${subName} ${activeCategory === 'הכל' ? `(${catName})` : ''}</span>`;
       groupCard.appendChild(header);
 
       items.forEach(task => groupCard.appendChild(createTaskCard(task)));
@@ -1027,51 +1029,53 @@
     const card = document.createElement('div');
     const isToday = task.hebrewSortKey === todayHeb.sortKey;
     
-    card.className = `bg-white p-3 rounded-xl shadow-sm border ${isToday ? 'border-amber-400 bg-amber-50/30' : 'border-gray-100'} flex items-center justify-between mb-1.5 ${task.completed ? 'opacity-50' : ''}`;
+    card.className = `bg-white p-3.5 rounded-2xl shadow-2xs border ${isToday ? 'border-amber-300 bg-amber-50/20' : 'border-slate-100'} flex items-center justify-between mb-2 transition ${task.completed ? 'opacity-50 bg-slate-50/50' : ''}`;
 
     if (task.isEditing) {
       card.innerHTML = `
-        <div class="w-full space-y-2">
-          <input type="text" id="edit-title-${task.id}" value="${task.title}" class="w-full p-1.5 border rounded-lg text-sm">
+        <div class="w-full space-y-2.5 p-1">
+          <input type="text" id="edit-title-${task.id}" value="${task.title}" class="w-full p-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500">
           <div class="grid grid-cols-2 gap-2">
-            <select id="edit-assignee-${task.id}" class="p-1 border rounded-lg text-xs">
+            <select id="edit-assignee-${task.id}" class="p-2 border border-slate-200 rounded-xl text-xs bg-white">
               ${assignees.map(a => `<option value="${a}" ${task.assignee === a ? 'selected' : ''}>${a}</option>`).join('')}
             </select>
-            <div class="flex items-center gap-1">
-              <input type="checkbox" id="edit-enable-date-${task.id}" onchange="onEditDateSwitchChange('${task.id}')">
-              <label for="edit-enable-date-${task.id}" class="text-xs text-gray-600 cursor-pointer">משוייך לתאריך</label>
+            <div class="flex items-center gap-1.5 px-1">
+              <input type="checkbox" id="edit-enable-date-${task.id}" onchange="onEditDateSwitchChange('${task.id}')" class="w-4 h-4 text-indigo-600 rounded">
+              <label for="edit-enable-date-${task.id}" class="text-xs font-medium text-slate-600 cursor-pointer">תאריך עברי</label>
             </div>
           </div>
-          <div id="edit-date-box-${task.id}" class="hidden grid grid-cols-3 gap-1">
-            <select id="edit-heb-day-${task.id}" class="p-1 border rounded-lg text-xs"></select>
-            <select id="edit-heb-month-${task.id}" class="p-1 border rounded-lg text-xs"></select>
-            <select id="edit-heb-year-${task.id}" class="p-1 border rounded-lg text-xs"></select>
+          <div id="edit-date-box-${task.id}" class="hidden grid grid-cols-3 gap-1.5 pt-1">
+            <select id="edit-heb-day-${task.id}" class="p-1.5 border border-slate-200 rounded-lg text-xs bg-white"></select>
+            <select id="edit-heb-month-${task.id}" class="p-1.5 border border-slate-200 rounded-lg text-xs bg-white"></select>
+            <select id="edit-heb-year-${task.id}" class="p-1.5 border border-slate-200 rounded-lg text-xs bg-white"></select>
           </div>
-          <button onclick="saveEdit('${task.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold">שמור</button>
+          <div class="flex justify-end pt-1">
+            <button onclick="saveEdit('${task.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-xs font-bold transition">שמור</button>
+          </div>
         </div>
       `;
     } else {
-      let badgeColor = 'bg-purple-100 text-purple-700';
-      if (task.assignee === 'יוסי') badgeColor = 'bg-blue-100 text-blue-700';
-      if (task.assignee === 'אסתי') badgeColor = 'bg-pink-100 text-pink-700';
+      let badgeColor = 'bg-purple-50 text-purple-700 border-purple-100';
+      if (task.assignee === 'יוסי') badgeColor = 'bg-blue-50 text-blue-700 border-blue-100';
+      if (task.assignee === 'אסתי') badgeColor = 'bg-rose-50 text-rose-700 border-rose-100';
 
       const dateText = task.hebrewDateDisplay || task.hebrewDate || null;
 
       card.innerHTML = `
-        <div class="flex items-center gap-2.5 flex-1">
-          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}')" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
-          <div>
-            <span class="text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'} font-medium block">${task.title}</span>
-            <div class="flex gap-1 mt-0.5 flex-wrap">
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}">${task.assignee}</span>
-              ${activeCategory === 'הכל' || activeCategory === '📅 עם תאריך' ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-bold">🏷️ ${task.category}</span>` : ''}
-              ${dateText ? `<span class="text-[10px] px-2 py-0.5 rounded-full ${isToday ? 'bg-amber-100 text-amber-800 font-extrabold border border-amber-300' : 'bg-blue-50 text-blue-700 border border-blue-200'} font-bold">📅 ${dateText}</span>` : ''}
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}')" class="w-4 h-4 text-indigo-600 rounded-md cursor-pointer accent-indigo-600 shrink-0">
+          <div class="min-w-0 flex-1">
+            <span class="text-xs sm:text-sm ${task.completed ? 'line-through text-slate-400' : 'text-slate-800'} font-semibold block truncate">${task.title}</span>
+            <div class="flex gap-1.5 mt-1 flex-wrap items-center">
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold border ${badgeColor}">${task.assignee}</span>
+              ${activeCategory === 'הכל' || activeCategory === '📅 עם תאריך' ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold border border-slate-200/60">🏷️ ${task.category}</span>` : ''}
+              ${dateText ? `<span class="text-[10px] px-2 py-0.5 rounded-full ${isToday ? 'bg-amber-100 text-amber-900 font-extrabold border border-amber-300' : 'bg-indigo-50 text-indigo-700 border border-indigo-100'} font-bold">📅 ${dateText}</span>` : ''}
             </div>
           </div>
         </div>
-        <div class="flex gap-1">
-          <button onclick="toggleEdit('${task.id}')" class="text-gray-400 hover:text-indigo-600 p-1 text-xs">✏️</button>
-          <button onclick="deleteTask('${task.id}')" class="text-gray-400 hover:text-red-600 p-1 text-xs">🗑️</button>
+        <div class="flex items-center gap-1 shrink-0 mr-2">
+          <button onclick="toggleEdit('${task.id}')" class="text-slate-400 hover:text-indigo-600 p-1.5 text-xs transition">✏️</button>
+          <button onclick="deleteTask('${task.id}')" class="text-slate-400 hover:text-rose-600 p-1.5 text-xs transition">🗑️</button>
         </div>
       `;
     }
