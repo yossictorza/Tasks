@@ -4,327 +4,244 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>המשימות שלנו</title>
-
-  <!-- הגדרות PWA ומנורת התקנה -->
+  
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/906/906334.png">
-  <link rel="manifest" href="manifest.json">
-
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background-color: #f3f4f6; }
   </style>
 </head>
 <body class="max-w-md mx-auto p-4 min-h-screen pb-20">
 
-  <!-- כפתור התקנה (מופיע בראש הדף) -->
-  <button id="install-btn" onclick="installPWA()" class="w-full mb-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center gap-2 text-sm">
-    📲 התקן את האפליקציה במסך הבית
+  <!-- כפתור התקנה PWA -->
+  <button id="install-btn" onclick="installPWA()" class="w-full mb-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl hidden">
+    התקן את האפליקציה במסך הבית 📲
   </button>
 
-  <!-- כותרת ותאריך -->
-  <header class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center mb-5">
-    <h1 class="text-2xl font-bold text-gray-800 mb-1">📋 המשימות שלנו</h1>
-    <div id="current-date" class="text-sm font-bold text-indigo-600"></div>
+  <!-- כותרת -->
+  <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4">
+    <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו 📋</h1>
+    <div id="current-date" class="text-xs font-bold text-indigo-600"></div>
   </header>
 
   <!-- טופס הוספת משימה -->
-  <section class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-5">
+  <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
     <h2 class="text-base font-bold text-gray-700 mb-3">➕ הוספת משימה חדשה</h2>
     
     <div class="space-y-3">
-      <input type="text" id="task-title" placeholder="מה צריך לעשות/לקנות?" class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+      <input type="text" id="task-title" placeholder="מה צריך לעשות / לקנות?" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
       
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="block text-xs text-gray-500 mb-1">קטגוריה</label>
-          <select id="task-category" class="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm">
-            <option value="🛒 קניות">🛒 קניות</option>
-            <option value="🏠 מטלות">🏠 מטלות בית</option>
-            <option value="📅 תזכורות">📅 תזכורות</option>
+          <select id="task-category" onchange="toggleStoreInput()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
+            <option value="קניות">🛒 קניות</option>
+            <option value="מטלות בית">🏠 מטלות בית</option>
+            <option value="תזכורות">⏰ תזכורות</option>
           </select>
         </div>
-
         <div>
           <label class="block text-xs text-gray-500 mb-1">אחראי/ת</label>
-          <select id="task-assignee" class="w-full p-2.5 border border-gray-200 rounded-xl bg-white text-sm">
-            <option value="שניהם">👥 שניהם</option>
-            <option value="יוסי">👦 יוסי</option>
-            <option value="אסתי">👧 אסתי</option>
+          <select id="task-assignee" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
+            <option value="יוסי">יוסי</option>
+            <option value="אסתי">אסתי</option>
           </select>
         </div>
       </div>
 
-      <!-- מתג ובחירת תאריך עברי -->
-      <div class="border border-gray-100 rounded-xl p-3 bg-gray-50">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-bold text-gray-700">תאריך יעד עברי</span>
-          <label class="flex items-center gap-2 cursor-pointer text-xs text-indigo-600 font-bold">
-            <input type="checkbox" id="enable-date-toggle" onchange="toggleDateSection()" class="w-4 h-4 accent-indigo-600 rounded">
-            להוסיף תאריך?
-          </label>
-        </div>
-
-        <div id="date-selects-container" class="grid grid-cols-3 gap-1.5 opacity-40 pointer-events-none transition-all">
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-0.5">יום</label>
-            <select id="heb-day" class="w-full p-2 border border-gray-200 rounded-lg bg-white text-xs">
-              <option value="א'">א'</option><option value="ב'">ב'</option><option value="ג'">ג'</option>
-              <option value="ד'">ד'</option><option value="ה'">ה'</option><option value="ו'">ו'</option>
-              <option value="ז'">ז'</option><option value="ח'">ח'</option><option value="ט'">ט'</option>
-              <option value="י'">י'</option><option value="י''א">י"א</option><option value="י''ב">י"ב</option>
-              <option value="י''ג">י"ג</option><option value="י''ד">י"ד</option><option value="ט''ו">ט"ו</option>
-              <option value="ט''ז">ט"ז</option><option value="י''ז">י"ז</option><option value="י''ח">י"ח</option>
-              <option value="י''ט">י"ט</option><option value="כ'">כ'</option><option value="כ''א">כ"א</option>
-              <option value="כ''ב">כ"ב</option><option value="כ''ג">כ"ג</option><option value="כ''ד">כ"ד</option>
-              <option value="כ''ה">כ"ה</option><option value="כ''ו">כ"ו</option><option value="כ''ז">כ"ז</option>
-              <option value="כ''ח">כ"ח</option><option value="כ''ט">כ"ט</option><option value="ל'">ל'</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-0.5">חודש</label>
-            <select id="heb-month" class="w-full p-2 border border-gray-200 rounded-lg bg-white text-xs">
-              <option value="תשרי">תשרי</option><option value="חשוון">חשוון</option>
-              <option value="כסלו">כסלו</option><option value="טבת">טבת</option>
-              <option value="שבט">שבט</option><option value="אדר">אדר</option>
-              <option value="אדר א'">אדר א'</option><option value="אדר ב'">אדר ב'</option>
-              <option value="ניסן">ניסן</option><option value="אייר">אייר</option>
-              <option value="סיוון">סיוון</option><option value="תמוז">תמוז</option>
-              <option value="אב">אב</option><option value="אלול">אלול</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-0.5">שנה</label>
-            <select id="heb-year" class="w-full p-2 border border-gray-200 rounded-lg bg-white text-xs">
-              <option value="תשפ&quot;ו">תשפ"ו</option>
-              <option value="תשפ&quot;ז">תשפ"ז</option>
-              <option value="תשפ&quot;ח">תשפ"ח</option>
-              <option value="תשפ&quot;ט">תשפ"ט</option>
-              <option value="תש&quot;ץ">תש"ץ</option>
-            </select>
-          </div>
-        </div>
+      <!-- שדה חנות (מופיע רק בקניות) -->
+      <div id="store-input-container">
+        <input type="text" id="task-store" placeholder="שם החנות (למשל: סופר, ירקן, פארם)" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
       </div>
 
-      <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-md text-sm">
-        הוסף לרשימה
+      <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+        הוסף משימה
       </button>
     </div>
   </section>
 
-  <!-- סרגל סינון -->
-  <div class="flex gap-2 mb-4">
-    <button onclick="setFilter('הכל')" id="btn-all" class="flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white">הכל</button>
-    <button onclick="setFilter('יוסי')" id="btn-yossi" class="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-gray-600 border border-gray-200">יוסי בלבד</button>
-    <button onclick="setFilter('אסתי')" id="btn-esti" class="flex-1 py-2 text-xs font-bold rounded-xl bg-white text-gray-600 border border-gray-200">אסתי בלבד</button>
+  <!-- סרגל סינון קטגוריות -->
+  <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
+    <button onclick="setCategoryFilter('הכל', this)" class="filter-btn active bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm whitespace-nowrap">הכל</button>
+    <button onclick="setCategoryFilter('קניות', this)" class="filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🛒 קניות</button>
+    <button onclick="setCategoryFilter('מטלות בית', this)" class="filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🏠 מטלות בית</button>
+    <button onclick="setCategoryFilter('תזכורות', this)" class="filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">⏰ תזכורות</button>
   </div>
 
-  <!-- רשימת משימות -->
-  <main id="tasks-list" class="space-y-2">
-    <div class="text-center text-gray-400 py-8 text-sm">טוען משימות...</div>
-  </main>
+  <!-- רשימת המשימות -->
+  <main id="tasks-container" class="space-y-3"></main>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyA8a1TKhbmHRGA04rwQFrrc-6YWElMHakY",
-      authDomain: "home-tasks-54c73.firebaseapp.com",
-      projectId: "home-tasks-54c73",
-      storageBucket: "home-tasks-54c73.firebasestorage.app",
-      messagingSenderId: "1087056925438",
-      appId: "1:1087056925438:web:191955dce8b35efe3cbaf"
+<script>
+  let tasks = JSON.parse(localStorage.getItem('my_tasks') || '[]');
+  let activeCategory = 'הכל';
+
+  // הצגת תאריך נוכחי
+  document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  function toggleStoreInput() {
+    const cat = document.getElementById('task-category').value;
+    const storeContainer = document.getElementById('store-input-container');
+    storeContainer.style.display = cat === 'קניות' ? 'block' : 'none';
+  }
+
+  function addTask() {
+    const title = document.getElementById('task-title').value.trim();
+    const category = document.getElementById('task-category').value;
+    const assignee = document.getElementById('task-assignee').value;
+    const store = document.getElementById('task-store').value.trim() || 'כללי';
+
+    if (!title) return alert('נא להזין תיאור משימה');
+
+    const newTask = {
+      id: Date.now(),
+      title,
+      category,
+      assignee,
+      store: category === 'קניות' ? store : null,
+      completed: false,
+      isEditing: false
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    tasks.push(newTask);
+    saveAndRender();
+    document.getElementById('task-title').value = '';
+    document.getElementById('task-store').value = '';
+  }
 
-    let currentFilter = 'הכל';
-    let deferredPrompt = null;
-
-    // זיהוי אפשרות התקנה
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
+  function setCategoryFilter(cat, btn) {
+    activeCategory = cat;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.remove('bg-indigo-600', 'text-white');
+      b.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
     });
+    btn.classList.remove('bg-white', 'text-gray-600', 'border');
+    btn.classList.add('bg-indigo-600', 'text-white');
+    render();
+  }
 
-    function installPWA() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            document.getElementById('install-btn').style.display = 'none';
-          }
-          deferredPrompt = null;
-        });
-      } else {
-        alert('להתקנה במכשיר:\n• באנדרואיד: לחץ על 3 הנקודות בדפדפן ובחר "הוסף למסך הבית".\n• באייפון: לחץ על כפתור השיתוף בתחתית הדפדפן ובחר "הוסף למסך הבית".');
-      }
+  function toggleTask(id) {
+    tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+    saveAndRender();
+  }
+
+  function deleteTask(id) {
+    tasks = tasks.filter(t => t.id !== id);
+    saveAndRender();
+  }
+
+  function toggleEdit(id) {
+    tasks = tasks.map(t => t.id === id ? { ...t, isEditing: !t.isEditing } : t);
+    render();
+  }
+
+  function saveEdit(id) {
+    const newTitle = document.getElementById(`edit-title-${id}`).value.trim();
+    const newAssignee = document.getElementById(`edit-assignee-${id}`).value;
+    const newStoreInput = document.getElementById(`edit-store-${id}`);
+    const newStore = newStoreInput ? newStoreInput.value.trim() || 'כללי' : null;
+
+    if (!newTitle) return;
+
+    tasks = tasks.map(t => t.id === id ? {
+      ...t,
+      title: newTitle,
+      assignee: newAssignee,
+      store: newStore,
+      isEditing: false
+    } : t);
+
+    saveAndRender();
+  }
+
+  function saveAndRender() {
+    localStorage.setItem('my_tasks', JSON.stringify(tasks));
+    render();
+  }
+
+  function render() {
+    const container = document.getElementById('tasks-container');
+    container.innerHTML = '';
+
+    const filtered = activeCategory === 'הכל' 
+      ? tasks 
+      : tasks.filter(t => t.category === activeCategory);
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">אין משימות להצגה</div>';
+      return;
     }
 
-    // הצגת תאריך עברי ולועזי בראש העמוד
-    function displayCurrentDate() {
-      const today = new Date();
-      const gregDate = today.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
-      const hebDate = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(today);
-      document.getElementById('current-date').innerText = `${hebDate} | ${gregDate}`;
+    // אם אנחנו בקטגוריית קניות - מקבצים לפי חנות
+    if (activeCategory === 'קניות') {
+      const grouped = filtered.reduce((acc, task) => {
+        const s = task.store || 'כללי';
+        if (!acc[s]) acc[s] = [];
+        acc[s].push(task);
+        return acc;
+      }, {});
+
+      for (const [storeName, items] of Object.entries(grouped)) {
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'text-xs font-bold text-gray-500 mt-3 mb-1 px-1';
+        groupHeader.innerText = `🏬 חנות: ${storeName}`;
+        container.appendChild(groupHeader);
+
+        items.forEach(task => container.appendChild(createTaskCard(task)));
+      }
+    } else {
+      filtered.forEach(task => container.appendChild(createTaskCard(task)));
     }
-    displayCurrentDate();
+  }
 
-    // הגדרת ברירת מחדל של התיבות לתאריך העברי של היום
-    function initHebrewDatePicker() {
-      const today = new Date();
-      const parts = new Intl.DateTimeFormat('he-IL-u-ca-hebrew', { day: 'numeric', month: 'long', year: 'numeric' }).formatToParts(today);
+  function createTaskCard(task) {
+    const card = document.createElement('div');
+    card.className = `bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between ${task.completed ? 'opacity-50' : ''}`;
 
-      let d = '', m = '', y = '';
-      parts.forEach(p => {
-        if (p.type === 'day') d = p.value;
-        if (p.type === 'month') m = p.value;
-        if (p.type === 'year') y = p.value;
-      });
-
-      const daySel = document.getElementById('heb-day');
-      const dNum = parseInt(d, 10);
-      if (!isNaN(dNum) && dNum >= 1 && dNum <= daySel.options.length) {
-        daySel.selectedIndex = dNum - 1;
-      }
-
-      const monthSel = document.getElementById('heb-month');
-      for (let i = 0; i < monthSel.options.length; i++) {
-        if (m.includes(monthSel.options[i].value) || monthSel.options[i].value.includes(m.replace('ב',''))) {
-          monthSel.selectedIndex = i;
-          break;
-        }
-      }
-
-      const yearSel = document.getElementById('heb-year');
-      for (let i = 0; i < yearSel.options.length; i++) {
-        if (y.includes(yearSel.options[i].value) || yearSel.options[i].value.includes(y)) {
-          yearSel.selectedIndex = i;
-          break;
-        }
-      }
-    }
-    initHebrewDatePicker();
-
-    function toggleDateSection() {
-      const enabled = document.getElementById('enable-date-toggle').checked;
-      const container = document.getElementById('date-selects-container');
-      if (enabled) {
-        container.classList.remove('opacity-40', 'pointer-events-none');
-      } else {
-        container.classList.add('opacity-40', 'pointer-events-none');
-      }
-    }
-
-    function addTask() {
-      const titleInput = document.getElementById('task-title');
-      const category = document.getElementById('task-category').value;
-      const assignee = document.getElementById('task-assignee').value;
-      const isDateEnabled = document.getElementById('enable-date-toggle').checked;
-
-      if (!titleInput.value.trim()) {
-        alert('נא להזין תיאור למשימה');
-        return;
-      }
-
-      let hebDateStr = null;
-      if (isDateEnabled) {
-        const day = document.getElementById('heb-day').value;
-        const month = document.getElementById('heb-month').value;
-        const year = document.getElementById('heb-year').value;
-        hebDateStr = `${day} ב${month} ${year}`;
-      }
-
-      db.collection("tasks").add({
-        title: titleInput.value.trim(),
-        category: category,
-        assignee: assignee,
-        dueDate: hebDateStr,
-        completed: false,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        titleInput.value = '';
-        document.getElementById('enable-date-toggle').checked = false;
-        toggleDateSection();
-      });
-    }
-
-    function setFilter(filter) {
-      currentFilter = filter;
-      ['all', 'yossi', 'esti'].forEach(id => {
-        const btn = document.getElementById(`btn-${id}`);
-        if (btn) btn.className = "flex-1 py-2 text-xs font-bold rounded-xl bg-white text-gray-600 border border-gray-200";
-      });
-      
-      if (filter === 'הכל') document.getElementById('btn-all').className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white";
-      if (filter === 'יוסי') document.getElementById('btn-yossi').className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white";
-      if (filter === 'אסתי') document.getElementById('btn-esti').className = "flex-1 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white";
-
-      loadTasks();
-    }
-
-    function loadTasks() {
-      db.collection("tasks").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-        const list = document.getElementById('tasks-list');
-        list.innerHTML = '';
-
-        let tasks = [];
-        snapshot.forEach(doc => {
-          tasks.push({ id: doc.id, ...doc.data() });
-        });
-
-        if (currentFilter !== 'הכל') {
-          tasks = tasks.filter(t => t.assignee === currentFilter || t.assignee === 'שניהם');
-        }
-
-        if (tasks.length === 0) {
-          list.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">אין משימות ברשימה 🎉</div>';
-          return;
-        }
-
-        tasks.forEach(task => {
-          const div = document.createElement('div');
-          div.className = `bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between ${task.completed ? 'opacity-50 line-through bg-gray-50' : ''}`;
-
-          div.innerHTML = `
-            <div class="flex items-center gap-3">
-              <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.id}', ${task.completed})" class="w-5 h-5 accent-indigo-600 rounded">
-              <div>
-                <p class="font-medium text-gray-800 text-sm">${task.title}</p>
-                <div class="flex gap-2 text-xs text-gray-400 mt-0.5">
-                  <span>${task.category}</span> • 
-                  <span>📅 ${task.dueDate || 'ללא תאריך'}</span>
-                </div>
-              </div>
+    if (task.isEditing) {
+      card.innerHTML = `
+        <div class="w-full space-y-2">
+          <input type="text" id="edit-title-${task.id}" value="${task.title}" class="w-full p-1.5 border rounded-lg text-sm">
+          <div class="flex gap-2">
+            <select id="edit-assignee-${task.id}" class="p-1 border rounded-lg text-xs">
+              <option value="יוסי" ${task.assignee === 'יוסי' ? 'selected' : ''}>יוסי</option>
+              <option value="אסתי" ${task.assignee === 'אסתי' ? 'selected' : ''}>אסתי</option>
+            </select>
+            ${task.category === 'קניות' ? `<input type="text" id="edit-store-${task.id}" value="${task.store || ''}" placeholder="חנות" class="p-1 border rounded-lg text-xs flex-1">` : ''}
+          </div>
+          <button onclick="saveEdit(${task.id})" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold">שמור</button>
+        </div>
+      `;
+    } else {
+      const badgeColor = task.assignee === 'יוסי' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700';
+      card.innerHTML = `
+        <div class="flex items-center gap-2.5 flex-1">
+          <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${task.id})" class="w-4 h-4 text-indigo-600 rounded">
+          <div>
+            <span class="text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'} font-medium block">${task.title}</span>
+            <div class="flex gap-1 mt-0.5">
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}">${task.assignee}</span>
+              ${task.store ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">🏬 ${task.store}</span>` : ''}
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs px-2.5 py-1 rounded-full font-medium ${task.assignee === 'יוסי' ? 'bg-blue-50 text-blue-600' : task.assignee === 'אסתי' ? 'bg-pink-50 text-pink-600' : 'bg-purple-50 text-purple-600'}">
-                ${task.assignee}
-              </span>
-              <button onclick="deleteTask('${task.id}')" class="text-gray-300 hover:text-red-500 text-sm pr-1">✕</button>
-            </div>
-          `;
-          list.appendChild(div);
-        });
-      });
+          </div>
+        </div>
+        <div class="flex gap-1">
+          <button onclick="toggleEdit(${task.id})" class="text-gray-400 hover:text-indigo-600 p-1 text-xs">✏️</button>
+          <button onclick="deleteTask(${task.id})" class="text-gray-400 hover:text-red-600 p-1 text-xs">🗑️</button>
+        </div>
+      `;
     }
 
-    function toggleTask(id, currentStatus) {
-      db.collection("tasks").doc(id).update({ completed: !currentStatus });
-    }
+    return card;
+  }
 
-    function deleteTask(id) {
-      db.collection("tasks").doc(id).delete();
-    }
+  function installPWA() {}
 
-    loadTasks();
- if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
-  </script>
+  // רנדור ראשוני
+  render();
+</script>
 </body>
 </html>
