@@ -22,11 +22,6 @@
 </head>
 <body class="max-w-md mx-auto p-4 min-h-screen pb-20">
 
-  <!-- כפתור התקנה PWA -->
-  <button id="install-btn" onclick="installPWA()" class="w-full mb-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl hidden">
-    התקן את האפליקציה במסך הבית 📲
-  </button>
-
   <!-- כותרת -->
   <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4">
     <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו 📋</h1>
@@ -43,7 +38,7 @@
       <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="block text-xs text-gray-500 mb-1">קטגוריה</label>
-          <select id="task-category" onchange="toggleStoreInput()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
+          <select id="task-category" onchange="onCategoryChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
             <option value="קניות">🛒 קניות</option>
             <option value="מטלות בית">🏠 מטלות בית</option>
             <option value="תזכורות">⏰ תזכורות</option>
@@ -52,15 +47,22 @@
         <div>
           <label class="block text-xs text-gray-500 mb-1">אחראי/ת</label>
           <select id="task-assignee" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
+            <option value="שנינו">שנינו</option>
             <option value="יוסי">יוסי</option>
             <option value="אסתי">אסתי</option>
           </select>
         </div>
       </div>
 
-      <!-- שדה חנות (מופיע רק בקניות) -->
-      <div id="store-input-container">
-        <input type="text" id="task-store" placeholder="שם החנות (למשל: סופר, ירקן, פארם)" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
+      <!-- תת-קטגוריה / חנות -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label class="block text-xs text-gray-500">תת-קטגוריה / חנות</label>
+          <button onclick="promptNewSubcategory()" class="text-[11px] text-indigo-600 font-bold hover:underline">+ צור תת-קטגוריה חדשה</button>
+        </div>
+        <select id="task-subcategory" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm">
+          <option value="כללי">כללי (ללא תת-קטגוריה)</option>
+        </select>
       </div>
 
       <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
@@ -69,19 +71,31 @@
     </div>
   </section>
 
-  <!-- סרגל סינון קטגוריות -->
-  <div class="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-    <button onclick="setCategoryFilter('הכל', this)" class="filter-btn active bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm whitespace-nowrap">הכל</button>
-    <button onclick="setCategoryFilter('קניות', this)" class="filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🛒 קניות</button>
-    <button onclick="setCategoryFilter('מטלות בית', this)" class="filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🏠 מטלות בית</button>
-    <button onclick="setCategoryFilter('תזכורות', this)" class="filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">⏰ תזכורות</button>
+  <!-- סרגלי סינון -->
+  <div class="space-y-2 mb-4">
+    <!-- סינון לפי קטגוריה -->
+    <div class="flex gap-1.5 overflow-x-auto pb-1">
+      <button onclick="setCategoryFilter('הכל', this)" class="cat-filter-btn active bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm whitespace-nowrap">הכל</button>
+      <button onclick="setCategoryFilter('קניות', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🛒 קניות</button>
+      <button onclick="setCategoryFilter('מטלות בית', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">🏠 מטלות בית</button>
+      <button onclick="setCategoryFilter('תזכורות', this)" class="cat-filter-btn bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">⏰ תזכורות</button>
+    </div>
+
+    <!-- סינון לפי אחראי -->
+    <div class="flex gap-1.5 overflow-x-auto pb-1">
+      <span class="text-xs text-gray-400 self-center pl-1 font-medium">אחראי:</span>
+      <button onclick="setAssigneeFilter('הכל', this)" class="ass-filter-btn active bg-gray-700 text-white px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">הכל</button>
+      <button onclick="setAssigneeFilter('שנינו', this)" class="ass-filter-btn bg-white text-gray-600 border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">👫 שנינו</button>
+      <button onclick="setAssigneeFilter('יוסי', this)" class="ass-filter-btn bg-white text-gray-600 border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">👨 יוסי</button>
+      <button onclick="setAssigneeFilter('אסתי', this)" class="ass-filter-btn bg-white text-gray-600 border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">👩 אסתי</button>
+    </div>
   </div>
 
   <!-- רשימת המשימות -->
-  <main id="tasks-container" class="space-y-3"></main>
+  <main id="tasks-container" class="space-y-4"></main>
 
 <script>
-  // הגדרות Firebase - הזינו את הפרטים המדויקים מתוך הגדרות הפרויקט ב-Firebase
+  // הגדרות Firebase - הזינו את הפרטים המדויקים מתוך Firebase Console
   const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -95,29 +109,72 @@
   const db = firebase.firestore();
 
   let tasks = [];
+  let subcategories = [];
   let activeCategory = 'הכל';
+  let activeAssignee = 'הכל';
 
   document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  // הגדרת מאזין בזמן אמת לשינויים במסד הנתונים בענן
+  // טעינת משימות בזמן אמת
   db.collection('tasks').onSnapshot((snapshot) => {
-    tasks = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     render();
   });
 
-  function toggleStoreInput() {
-    const cat = document.getElementById('task-category').value;
-    document.getElementById('store-input-container').style.display = cat === 'קניות' ? 'block' : 'none';
+  // טעינת תתי-קטגוריות בזמן אמת
+  db.collection('subcategories').onSnapshot((snapshot) => {
+    subcategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    updateSubcategoryDropdown();
+    render();
+  });
+
+  function onCategoryChange() {
+    updateSubcategoryDropdown();
+  }
+
+  function updateSubcategoryDropdown() {
+    const selectedCat = document.getElementById('task-category').value;
+    const subSelect = document.getElementById('task-subcategory');
+    subSelect.innerHTML = '<option value="כללי">כללי (ללא תת-קטגוריה)</option>';
+
+    const filteredSubs = subcategories.filter(s => s.parentCategory === selectedCat);
+    filteredSubs.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.name;
+      opt.innerText = s.name;
+      subSelect.appendChild(opt);
+    });
+  }
+
+  function promptNewSubcategory() {
+    const parentCategory = document.getElementById('task-category').value;
+    const name = prompt(`הזן שם לתת-קטגוריה / חנות חדשה עבור "${parentCategory}":`);
+    if (!name || !name.trim()) return;
+
+    db.collection('subcategories').add({
+      name: name.trim(),
+      parentCategory: parentCategory
+    });
+  }
+
+  function deleteSubcategory(subId, subName, parentCat) {
+    if (confirm(`האם למחוק את תת-הקטגוריה "${subName}"? כל המשימות השייכות אליה יימחקו אוטומטית!`)) {
+      // מחיקת תת-הקטגוריה
+      db.collection('subcategories').doc(subId).delete();
+
+      // מחיקת כל המשימות השייכות אליה
+      const tasksToDelete = tasks.filter(t => t.category === parentCat && t.subcategory === subName);
+      tasksToDelete.forEach(t => {
+        db.collection('tasks').doc(t.id).delete();
+      });
+    }
   }
 
   function addTask() {
     const title = document.getElementById('task-title').value.trim();
     const category = document.getElementById('task-category').value;
     const assignee = document.getElementById('task-assignee').value;
-    const store = document.getElementById('task-store').value.trim() || 'כללי';
+    const subcategory = document.getElementById('task-subcategory').value;
 
     if (!title) return alert('נא להזין תיאור משימה');
 
@@ -125,18 +182,17 @@
       title,
       category,
       assignee,
-      store: category === 'קניות' ? store : null,
+      subcategory,
       completed: false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     document.getElementById('task-title').value = '';
-    document.getElementById('task-store').value = '';
   }
 
   function setCategoryFilter(cat, btn) {
     activeCategory = cat;
-    document.querySelectorAll('.filter-btn').forEach(b => {
+    document.querySelectorAll('.cat-filter-btn').forEach(b => {
       b.classList.remove('bg-indigo-600', 'text-white');
       b.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
     });
@@ -145,10 +201,19 @@
     render();
   }
 
-  function toggleTask(id, currentStatus) {
-    db.collection('tasks').doc(id).update({
-      completed: !currentStatus
+  function setAssigneeFilter(ass, btn) {
+    activeAssignee = ass;
+    document.querySelectorAll('.ass-filter-btn').forEach(b => {
+      b.classList.remove('bg-gray-700', 'text-white');
+      b.classList.add('bg-white', 'text-gray-600', 'border', 'border-gray-200');
     });
+    btn.classList.remove('bg-white', 'text-gray-600', 'border');
+    btn.classList.add('bg-gray-700', 'text-white');
+    render();
+  }
+
+  function toggleTask(id, currentStatus) {
+    db.collection('tasks').doc(id).update({ completed: !currentStatus });
   }
 
   function deleteTask(id) {
@@ -163,15 +228,12 @@
   function saveEdit(id) {
     const newTitle = document.getElementById(`edit-title-${id}`).value.trim();
     const newAssignee = document.getElementById(`edit-assignee-${id}`).value;
-    const newStoreInput = document.getElementById(`edit-store-${id}`);
-    const newStore = newStoreInput ? newStoreInput.value.trim() || 'כללי' : null;
 
     if (!newTitle) return;
 
     db.collection('tasks').doc(id).update({
       title: newTitle,
-      assignee: newAssignee,
-      store: newStore
+      assignee: newAssignee
     });
   }
 
@@ -179,39 +241,61 @@
     const container = document.getElementById('tasks-container');
     container.innerHTML = '';
 
-    const filtered = activeCategory === 'הכל' 
-      ? tasks 
-      : tasks.filter(t => t.category === activeCategory);
+    // סינון לפי קטגוריה ואחראי
+    let filtered = tasks.filter(t => {
+      const matchCat = activeCategory === 'הכל' || t.category === activeCategory;
+      const matchAss = activeAssignee === 'הכל' || t.assignee === activeAssignee;
+      return matchCat && matchAss;
+    });
 
     if (filtered.length === 0) {
       container.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">אין משימות להצגה</div>';
       return;
     }
 
-    if (activeCategory === 'קניות') {
-      const grouped = filtered.reduce((acc, task) => {
-        const s = task.store || 'כללי';
-        if (!acc[s]) acc[s] = [];
-        acc[s].push(task);
-        return acc;
-      }, {});
-
-      for (const [storeName, items] of Object.entries(grouped)) {
-        const groupHeader = document.createElement('div');
-        groupHeader.className = 'text-xs font-bold text-gray-500 mt-3 mb-1 px-1';
-        groupHeader.innerText = `🏬 חנות: ${storeName}`;
-        container.appendChild(groupHeader);
-
-        items.forEach(task => container.appendChild(createTaskCard(task)));
+    // משימות כלליות (ללא תת-קטגוריה)
+    const generalTasks = filtered.filter(t => !t.subcategory || t.subcategory === 'כללי');
+    if (generalTasks.length > 0) {
+      if (activeCategory !== 'הכל') {
+        const genHeader = document.createElement('div');
+        genHeader.className = 'text-xs font-bold text-gray-500 mb-1 px-1';
+        genHeader.innerText = '📌 משימות כלליות';
+        container.appendChild(genHeader);
       }
-    } else {
-      filtered.forEach(task => container.appendChild(createTaskCard(task)));
+      generalTasks.forEach(task => container.appendChild(createTaskCard(task)));
+    }
+
+    // מקובץ לפי תתי-קטגוריות
+    const subGrouped = {};
+    filtered.filter(t => t.subcategory && t.subcategory !== 'כללי').forEach(t => {
+      const key = `${t.category}___${t.subcategory}`;
+      if (!subGrouped[key]) subGrouped[key] = [];
+      subGrouped[key].push(t);
+    });
+
+    for (const [groupKey, items] of Object.entries(subGrouped)) {
+      const [catName, subName] = groupKey.split('___');
+      const subObj = subcategories.find(s => s.name === subName && s.parentCategory === catName);
+
+      const groupCard = document.createElement('div');
+      groupCard.className = 'bg-gray-50 p-3 rounded-2xl border border-gray-200 space-y-2';
+
+      const header = document.createElement('div');
+      header.className = 'flex justify-between items-center mb-1';
+      header.innerHTML = `
+        <span class="text-xs font-bold text-gray-700">📂 ${subName} ${activeCategory === 'הכל' ? `(${catName})` : ''}</span>
+        ${subObj ? `<button onclick="deleteSubcategory('${subObj.id}', '${subName}', '${catName}')" class="text-gray-400 hover:text-red-600 text-xs font-normal">🗑️ מחק תת-קטגוריה</button>` : ''}
+      `;
+      groupCard.appendChild(header);
+
+      items.forEach(task => groupCard.appendChild(createTaskCard(task)));
+      container.appendChild(groupCard);
     }
   }
 
   function createTaskCard(task) {
     const card = document.createElement('div');
-    card.className = `bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between ${task.completed ? 'opacity-50' : ''}`;
+    card.className = `bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between mb-2 ${task.completed ? 'opacity-50' : ''}`;
 
     if (task.isEditing) {
       card.innerHTML = `
@@ -219,24 +303,27 @@
           <input type="text" id="edit-title-${task.id}" value="${task.title}" class="w-full p-1.5 border rounded-lg text-sm">
           <div class="flex gap-2">
             <select id="edit-assignee-${task.id}" class="p-1 border rounded-lg text-xs">
+              <option value="שנינו" ${task.assignee === 'שנינו' ? 'selected' : ''}>שנינו</option>
               <option value="יוסי" ${task.assignee === 'יוסי' ? 'selected' : ''}>יוסי</option>
               <option value="אסתי" ${task.assignee === 'אסתי' ? 'selected' : ''}>אסתי</option>
             </select>
-            ${task.category === 'קניות' ? `<input type="text" id="edit-store-${task.id}" value="${task.store || ''}" placeholder="חנות" class="p-1 border rounded-lg text-xs flex-1">` : ''}
           </div>
           <button onclick="saveEdit('${task.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold">שמור</button>
         </div>
       `;
     } else {
-      const badgeColor = task.assignee === 'יוסי' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700';
+      let badgeColor = 'bg-purple-100 text-purple-700';
+      if (task.assignee === 'יוסי') badgeColor = 'bg-blue-100 text-blue-700';
+      if (task.assignee === 'אסתי') badgeColor = 'bg-pink-100 text-pink-700';
+
       card.innerHTML = `
         <div class="flex items-center gap-2.5 flex-1">
           <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask('${task.id}', ${task.completed})" class="w-4 h-4 text-indigo-600 rounded">
           <div>
             <span class="text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-800'} font-medium block">${task.title}</span>
-            <div class="flex gap-1 mt-0.5">
+            <div class="flex gap-1 mt-0.5 flex-wrap">
               <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}">${task.assignee}</span>
-              ${task.store ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">🏬 ${task.store}</span>` : ''}
+              ${activeCategory === 'הכל' ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">🏷️ ${task.category}</span>` : ''}
             </div>
           </div>
         </div>
@@ -249,8 +336,6 @@
 
     return card;
   }
-
-  function installPWA() {}
 </script>
 </body>
 </html>
