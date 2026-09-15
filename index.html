@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>המשימות שלנו v1.0.3</title>
+  <title>המשימות שלנו v1.0.4</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
 
-  <!-- לוגו ואייקון מותאם אישית למסך הבית (SVG ברזולוציה גבוהה) -->
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
 
-  <!-- הגדרות אפליקציה להתקנה (PWA Manifest) -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=3","display":"standalone","background_color":"%23ffffff","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27300%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=4","display":"standalone","background_color":"%23ffffff","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27300%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
   
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -31,7 +29,7 @@
 
   <!-- כותרת ותאריך -->
   <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4 relative">
-    <span class="absolute top-2 left-3 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v1.0.3</span>
+    <span class="absolute top-2 left-3 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v1.0.4</span>
     <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו 📋</h1>
     <div id="current-date" class="text-xs font-bold text-indigo-600 mb-2"></div>
     
@@ -41,10 +39,18 @@
       <button onclick="switchUserGroup()" class="text-[10px] text-indigo-600 underline hover:text-indigo-900">החלף</button>
     </div>
 
-    <!-- כפתור להתקנת האפליקציה בלחיצה אחת -->
-    <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto w-full cursor-pointer">
-      📲 התקן את האפליקציה למכשיר
-    </button>
+    <!-- כפתורי פעולה מהירים -->
+    <div class="space-y-2 mt-2">
+      <!-- כפתור להתקנת האפליקציה בלחיצה אחת -->
+      <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto w-full cursor-pointer">
+        📲 התקן את האפליקציה למכשיר
+      </button>
+
+      <!-- כפתור הורדת קובץ האפליקציה למכשיר -->
+      <button onclick="downloadAppFile()" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto w-full cursor-pointer">
+        📥 הורד את קובץ האפליקציה למכשיר
+      </button>
+    </div>
   </header>
 
   <!-- באנר משימות להיום -->
@@ -203,6 +209,20 @@
   </div>
 
 <script>
+  // פונקציה להורדת קובץ האפליקציה ישירות מתוך הדפדפן
+  function downloadAppFile() {
+    const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tasks-app.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   // ניהול התקנת PWA
   let deferredPrompt;
   const installBtn = document.getElementById('install-pwa-btn');
@@ -736,49 +756,6 @@
     });
   }
 
-  function renderAssigneeFilterBar() {
-    const bar = document.getElementById('assignee-filter-bar');
-    if (!bar) return;
-    bar.innerHTML = '';
-
-    const label = document.createElement('span');
-    label.className = 'text-xs text-gray-400 pl-1 font-medium whitespace-nowrap';
-    label.innerText = 'אחראי:';
-    bar.appendChild(label);
-
-    bar.appendChild(createFilterButton('הכל', activeAssignee === 'הכל', () => setAssigneeFilter('הכל')));
-    assignees.forEach(a => {
-      bar.appendChild(createFilterButton(a, activeAssignee === a, () => setAssigneeFilter(a)));
-    });
-  }
-
-  function updateSubcategoryFilterBar() {
-    const bar = document.getElementById('subcategory-filter-bar');
-    const container = document.getElementById('subcategory-filter-buttons');
-    if (!bar || !container) return;
-
-    if (activeCategory === 'הכל' || activeCategory === '📅 עם תאריך') {
-      bar.classList.add('hidden');
-      activeSubcategory = 'הכל';
-      return;
-    }
-
-    const availableSubs = subcategories.filter(s => s.parentCategory === activeCategory);
-    if (availableSubs.length === 0) {
-      bar.classList.add('hidden');
-      activeSubcategory = 'הכל';
-      return;
-    }
-
-    bar.classList.remove('hidden');
-    container.innerHTML = '';
-    container.appendChild(createFilterButton('הכל', activeSubcategory === 'הכל', () => setSubcategoryFilter('הכל')));
-    container.appendChild(createFilterButton('כללי', activeSubcategory === 'כללי', () => setSubcategoryFilter('כללי')));
-    availableSubs.forEach(s => {
-      container.appendChild(createFilterButton(s.name, activeSubcategory === s.name, () => setSubcategoryFilter(s.name)));
-    });
-  }
-
   function setCategoryFilter(cat) {
     activeCategory = cat;
     activeSubcategory = 'הכל';
@@ -787,111 +764,154 @@
     render();
   }
 
-  function setAssigneeFilter(ass) {
-    activeAssignee = ass;
-    renderAssigneeFilterBar();
-    render();
+  function renderAssigneeFilterBar() {
+    const bar = document.getElementById('assignee-filter-bar');
+    if (!bar) return;
+    bar.innerHTML = '';
+    bar.appendChild(createFilterButton('👥 כולם', activeAssignee === 'הכל', () => {
+      activeAssignee = 'הכל';
+      renderAssigneeFilterBar();
+      render();
+    }));
+    assignees.forEach(a => {
+      bar.appendChild(createFilterButton(a, activeAssignee === a, () => {
+        activeAssignee = a;
+        renderAssigneeFilterBar();
+        render();
+      }));
+    });
   }
 
-  function setSubcategoryFilter(sub) {
-    activeSubcategory = sub;
-    updateSubcategoryFilterBar();
-    render();
+  function updateSubcategoryFilterBar() {
+    const subBar = document.getElementById('subcategory-filter-bar');
+    const buttonsContainer = document.getElementById('subcategory-filter-buttons');
+    if (!subBar || !buttonsContainer) return;
+
+    if (activeCategory === 'הכל' || activeCategory === '📅 עם תאריך') {
+      subBar.classList.add('hidden');
+      return;
+    }
+
+    const filteredSubs = subcategories.filter(s => s.parentCategory === activeCategory);
+    if (filteredSubs.length === 0) {
+      subBar.classList.add('hidden');
+      return;
+    }
+
+    subBar.classList.remove('hidden');
+    buttonsContainer.innerHTML = '';
+
+    buttonsContainer.appendChild(createFilterButton('הכל', activeSubcategory === 'הכל', () => {
+      activeSubcategory = 'הכל';
+      updateSubcategoryFilterBar();
+      render();
+    }));
+
+    filteredSubs.forEach(s => {
+      buttonsContainer.appendChild(createFilterButton(s.name, activeSubcategory === s.name, () => {
+        activeSubcategory = s.name;
+        updateSubcategoryFilterBar();
+        render();
+      }));
+    });
   }
 
   function addTask() {
-    const titleInput = document.getElementById('task-title');
-    const title = titleInput.value.trim();
-    if (!title) return alert('נא להזין טקסט למשימה');
-
+    const title = document.getElementById('task-title').value.trim();
     const category = document.getElementById('task-category').value;
     const assignee = document.getElementById('task-assignee').value;
-    const subcategory = document.getElementById('task-subcategory').value || 'כללי';
+    const subcategory = document.getElementById('task-subcategory').value;
     const enableDate = document.getElementById('task-enable-date').checked;
 
-    let hebDateData = null;
+    if (!title) return alert('נא להזין תוכן למשימה');
+
+    let taskData = {
+      id: Date.now().toString(),
+      title: title,
+      category: category,
+      assignee: assignee,
+      subcategory: subcategory === 'כללי' ? '' : subcategory,
+      completed: false,
+      createdAt: new Date().toISOString()
+    };
+
     if (enableDate) {
       const day = parseInt(document.getElementById('task-heb-day').value, 10);
       const monthCode = parseFloat(document.getElementById('task-heb-month').value);
       const year = parseInt(document.getElementById('task-heb-year').value, 10);
-
-      const mObj = HEBREW_MONTHS_LIST.find(m => m.code === monthCode) || HEBREW_MONTHS_LIST[0];
+      const monthObj = HEBREW_MONTHS_LIST.find(m => m.code === monthCode);
+      const monthName = monthObj ? monthObj.name : 'תשרי';
       const dayHeb = HEBREW_DAYS_LIST[day] || day + "'";
       const yearHeb = toHebrewYear(year);
 
-      hebDateData = {
-        day,
-        monthCode,
-        monthName: mObj.name,
-        year,
-        dateDisplay: `${dayHeb} ב${mObj.name} ${yearHeb}`,
+      taskData.hebDate = {
+        day: day,
+        monthCode: monthCode,
+        monthName: monthName,
+        year: year,
+        dateDisplay: `${dayHeb} ב${monthName} ${yearHeb}`,
         sortKey: Math.floor(year * 10000 + monthCode * 100 + day)
       };
     }
 
-    const newTask = {
-      id: Date.now().toString(),
-      title,
-      category,
-      assignee,
-      subcategory,
-      completed: false,
-      hebDate: hebDateData,
-      createdAt: Date.now()
-    };
-
-    tasks.unshift(newTask);
+    tasks.unshift(taskData);
     saveDataCloud();
 
-    titleInput.value = '';
+    document.getElementById('task-title').value = '';
     document.getElementById('task-enable-date').checked = false;
     document.getElementById('task-date-picker-box').classList.add('hidden');
+    updateSubcategoryDropdown();
+    render();
   }
 
   function toggleTask(id) {
     tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
     saveDataCloud();
+    render();
   }
 
   function deleteTask(id) {
-    if (confirm('האם למחוק את המשימה?')) {
+    if (confirm('האם למחוק את המשימה לצמיתות?')) {
       tasks = tasks.filter(t => t.id !== id);
       saveDataCloud();
+      render();
     }
   }
 
   function render() {
     const container = document.getElementById('tasks-container');
     const todayBanner = document.getElementById('today-banner');
-    const todayList = document.getElementById('today-tasks-list');
+    const todayTasksList = document.getElementById('today-tasks-list');
     const todayCount = document.getElementById('today-count');
-    if (!container) return;
-
-    // משימות להיום
-    const todayTasks = tasks.filter(t => !t.completed && t.hebDate && t.hebDate.day === todayHeb.day && t.hebDate.monthCode === todayHeb.monthCode && t.hebDate.year === todayHeb.year);
     
-    if (todayTasks.length > 0) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    // משימות להיום (תאריך עברי תואם להיום)
+    const todayTasks = tasks.filter(t => !t.completed && t.hebDate && t.hebDate.sortKey === todayHeb.sortKey);
+    if (todayTasks.length > 0 && todayBanner && todayTasksList && todayCount) {
       todayBanner.classList.remove('hidden');
       document.getElementById('today-date-text').innerText = todayHeb.dateDisplay;
       todayCount.innerText = todayTasks.length;
-      todayList.innerHTML = '';
+      todayTasksList.innerHTML = '';
+      
       todayTasks.forEach(t => {
-        const item = document.createElement('div');
-        item.className = 'flex items-center justify-between bg-white p-2 rounded-xl border border-amber-100 text-xs shadow-2xs';
-        item.innerHTML = `
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between bg-white p-2 rounded-xl border border-amber-100 text-xs';
+        div.innerHTML = `
           <div class="flex items-center gap-2">
-            <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTask('${t.id}')" class="w-4 h-4 text-indigo-600 rounded cursor-pointer">
+            <button onclick="toggleTask('${t.id}')" class="w-4 h-4 rounded border border-amber-400 flex items-center justify-center bg-white cursor-pointer"></button>
             <span class="font-bold text-gray-800">${t.title}</span>
           </div>
-          <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">${t.assignee}</span>
+          <span class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-bold">${t.assignee}</span>
         `;
-        todayList.appendChild(item);
+        todayTasksList.appendChild(div);
       });
-    } else {
+    } else if (todayBanner) {
       todayBanner.classList.add('hidden');
     }
 
-    // סינון כללי
+    // סינון רשימת המשימות הראשית
     let filtered = tasks.filter(t => {
       if (activeCategory === '📅 עם תאריך') {
         if (!t.hebDate) return false;
@@ -899,52 +919,57 @@
         return false;
       }
 
-      if (activeSubcategory !== 'הכל' && t.subcategory !== activeSubcategory) {
+      if (activeAssignee !== 'הכל' && t.assignee !== activeAssignee) {
         return false;
       }
 
-      if (activeAssignee !== 'הכל' && t.assignee !== activeAssignee) {
-        return false;
+      if (activeSubcategory !== 'הכל') {
+        if (activeSubcategory === 'כללי' && t.subcategory) return false;
+        if (activeSubcategory !== 'כללי' && t.subcategory !== activeSubcategory) return false;
       }
 
       return true;
     });
 
-    container.innerHTML = '';
-
     if (filtered.length === 0) {
-      container.innerHTML = `
-        <div class="bg-white rounded-2xl p-8 text-center border border-gray-100 shadow-sm text-gray-400 text-sm">
-          אין משימות להצגה כרגע 📋
-        </div>
-      `;
+      container.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">אין משימות להצגה במסנן הנוכחי 📋</div>';
       return;
     }
 
     filtered.forEach(t => {
       const card = document.createElement('div');
-      card.className = `bg-white rounded-2xl p-3.5 shadow-sm border transition flex items-center justify-between gap-3 ${t.completed ? 'opacity-60 bg-gray-50/80 border-gray-100' : 'border-gray-100 hover:border-indigo-100'}`;
+      card.className = `bg-white rounded-2xl p-3.5 shadow-sm border transition flex items-center justify-between gap-3 ${t.completed ? 'opacity-60 bg-gray-50 border-gray-100' : 'border-gray-100'}`;
       
+      let dateHtml = '';
+      if (t.hebDate) {
+        dateHtml = `<div class="text-[11px] text-indigo-600 font-bold flex items-center gap-1 mt-0.5">📅 ${t.hebDate.dateDisplay}</div>`;
+      }
+
+      let subCatHtml = '';
+      if (t.subcategory) {
+        subCatHtml = `<span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">🏷️ ${t.subcategory}</span>`;
+      }
+
       card.innerHTML = `
-        <div class="flex items-center gap-3 flex-1 min-w-0">
-          <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTask('${t.id}')" class="w-5 h-5 text-indigo-600 rounded cursor-pointer shrink-0">
+        <div class="flex items-start gap-3 flex-1 min-w-0">
+          <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTask('${t.id}')" class="mt-1 w-5 h-5 text-indigo-600 rounded cursor-pointer">
           <div class="flex-1 min-w-0">
-            <div class="text-sm font-bold text-gray-800 truncate ${t.completed ? 'line-through text-gray-400' : ''}">${t.title}</div>
-            <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[10px]">
-              <span class="bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-full">${t.category}</span>
-              ${t.subcategory && t.subcategory !== 'כללי' ? `<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">${t.subcategory}</span>` : ''}
-              <span class="bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded-full">${t.assignee}</span>
-              ${t.hebDate ? `<span class="bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full">📅 ${t.hebDate.dateDisplay}</span>` : ''}
+            <h3 class="text-sm font-bold text-gray-800 break-words ${t.completed ? 'line-through text-gray-400' : ''}">${t.title}</h3>
+            ${dateHtml}
+            <div class="flex flex-wrap gap-1.5 mt-1.5">
+              <span class="text-[10px] bg-indigo-50 text-indigo-800 px-2 py-0.5 rounded-full font-bold">${t.category}</span>
+              <span class="text-[10px] bg-purple-50 text-purple-800 px-2 py-0.5 rounded-full font-bold">${t.assignee}</span>
+              ${subCatHtml}
             </div>
           </div>
         </div>
-        <button onclick="deleteTask('${t.id}')" class="text-gray-300 hover:text-red-500 p-1.5 transition cursor-pointer">🗑️</button>
+        <button onclick="deleteTask('${t.id}')" class="text-gray-300 hover:text-red-500 p-1 rounded-lg transition cursor-pointer" title="מחק משימה">🗑️</button>
       `;
       container.appendChild(card);
     });
   }
 
-  // הפעלה ראשונית של האזנה לענן
+  // הפעלה ראשונית של האזנה לנתונים בענן
   listenToCloudData();
 </script>
 </body>
