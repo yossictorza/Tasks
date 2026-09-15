@@ -113,13 +113,8 @@
 
   <!-- סרגלי סינון -->
   <div class="space-y-2 mb-4">
-    <!-- סרגל קטגוריות ראשיות -->
     <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="category-filter-bar"></div>
-
-    <!-- סרגל אחראי -->
     <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="assignee-filter-bar"></div>
-
-    <!-- סרגל קטגוריות משניות -->
     <div id="subcategory-filter-bar" class="hidden flex items-center gap-1.5 overflow-x-auto pb-1">
       <span class="text-xs text-gray-400 pl-1 font-medium whitespace-nowrap">קטגוריה:</span>
       <div id="subcategory-filter-buttons" class="flex gap-1.5 overflow-x-auto"></div>
@@ -129,21 +124,18 @@
   <!-- רשימת המשימות -->
   <main id="tasks-container" class="space-y-3"></main>
 
-  <!-- מודאל הוספת פריט עם אימוג'ים -->
+  <!-- מודאל הוספה -->
   <div id="add-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
       <h3 id="add-modal-title" class="text-sm font-bold text-gray-800"></h3>
-      
       <div>
         <label class="block text-xs text-gray-500 mb-1">בחר אימוג'י להצעה:</label>
         <div id="emoji-picker" class="flex flex-wrap gap-1.5 p-2 bg-gray-50 rounded-xl border border-gray-100 max-h-28 overflow-y-auto"></div>
       </div>
-
       <div>
         <label class="block text-xs text-gray-500 mb-1">שם:</label>
         <input type="text" id="add-modal-input" class="w-full p-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
       </div>
-
       <div class="flex justify-end gap-2 pt-2">
         <button onclick="closeAddModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">ביטול</button>
         <button onclick="confirmAddModal()" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-xl">אישור</button>
@@ -151,7 +143,7 @@
     </div>
   </div>
 
-  <!-- מודאל מחיקת פריטים בלחיצה מתוך רשימה -->
+  <!-- מודאל מחיקת פריטים (עם סריקה מורחבת ואפשרות איפוס) -->
   <div id="delete-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
       <div class="flex justify-between items-center border-b pb-2">
@@ -161,7 +153,8 @@
       
       <div id="delete-modal-list" class="space-y-1.5 max-h-60 overflow-y-auto pt-1"></div>
 
-      <div class="flex justify-end pt-2">
+      <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+        <button onclick="resetAllStorage()" class="text-[11px] font-bold text-red-500 hover:underline">⚠️ איפוס כל הנתונים השמורים</button>
         <button onclick="closeDeleteModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl">סגור</button>
       </div>
     </div>
@@ -175,29 +168,16 @@
   ];
 
   const HEBREW_MONTHS_LIST = [
-    { name: 'תשרי', code: 1 },
-    { name: 'חשוון', code: 2 },
-    { name: 'כסלו', code: 3 },
-    { name: 'טבת', code: 4 },
-    { name: 'שבט', code: 5 },
-    { name: 'אדר', code: 6 },
-    { name: 'אדר א\'', code: 6.1 },
-    { name: 'אדר ב\'', code: 6.2 },
-    { name: 'ניסן', code: 7 },
-    { name: 'אייר', code: 8 },
-    { name: 'סיוון', code: 9 },
-    { name: 'תמוז', code: 10 },
-    { name: 'אב', code: 11 },
-    { name: 'אלול', code: 12 }
+    { name: 'תשרי', code: 1 }, { name: 'חשוון', code: 2 }, { name: 'כסלו', code: 3 },
+    { name: 'טבת', code: 4 }, { name: 'שבט', code: 5 }, { name: 'אדר', code: 6 },
+    { name: 'אדר א\'', code: 6.1 }, { name: 'אדר ב\'', code: 6.2 }, { name: 'ניסן', code: 7 },
+    { name: 'אייר', code: 8 }, { name: 'סיוון', code: 9 }, { name: 'תמוז', code: 10 },
+    { name: 'אב', code: 11 }, { name: 'אלול', code: 12 }
   ];
 
   const HEBREW_YEARS_LIST = [
-    { num: 5785, text: 'תשפ"ה' },
-    { num: 5786, text: 'תשפ"ו' },
-    { num: 5787, text: 'תשפ"ז' },
-    { num: 5788, text: 'תשפ"ח' },
-    { num: 5789, text: 'תשפ"ט' },
-    { num: 5790, text: 'תש"צ' }
+    { num: 5785, text: 'תשפ"ה' }, { num: 5786, text: 'תשפ"ו' }, { num: 5787, text: 'תשפ"ז' },
+    { num: 5788, text: 'תשפ"ח' }, { num: 5789, text: 'תשפ"ט' }, { num: 5790, text: 'תש"צ' }
   ];
 
   function toHebrewYear(yearNum) {
@@ -215,14 +195,10 @@
         if (p.type === 'month') monthName = p.value;
         if (p.type === 'year') year = parseInt(p.value, 10);
       }
-      
       let matchedMonth = HEBREW_MONTHS_LIST.find(m => monthName.includes(m.name)) || HEBREW_MONTHS_LIST[0];
       const dayHeb = HEBREW_DAYS_LIST[day] || day + "'";
       const yearHeb = toHebrewYear(year);
-      const dateDisplay = `${dayHeb} ב${matchedMonth.name} ${yearHeb}`;
-      const sortKey = Math.floor(year * 10000 + matchedMonth.code * 100 + day);
-
-      return { day, monthCode: matchedMonth.code, monthName: matchedMonth.name, year, dayHeb, yearHeb, dateDisplay, sortKey };
+      return { day, monthCode: matchedMonth.code, monthName: matchedMonth.name, year, dayHeb, yearHeb, dateDisplay: `${dayHeb} ב${matchedMonth.name} ${yearHeb}`, sortKey: Math.floor(year * 10000 + matchedMonth.code * 100 + day) };
     } catch(e) {
       return { day: 1, monthCode: 1, monthName: 'תשרי', year: 5787, dayHeb: "א'", yearHeb: 'תשפ"ז', dateDisplay: "א' בתשרי תשפ\"ז", sortKey: 57870101 };
     }
@@ -230,7 +206,6 @@
 
   const todayHeb = getTodayHebrewData();
 
-  // טעינת נתונים שמורים
   let categories = JSON.parse(localStorage.getItem('app_categories')) || ['🛒 קניות', '🏠 מטלות בית', '⏰ תזכורות'];
   let assignees = JSON.parse(localStorage.getItem('app_assignees')) || ['👫 שנינו', '👨 יוסי', '👩 אסתי'];
   let subcategories = JSON.parse(localStorage.getItem('app_subcategories')) || [];
@@ -259,7 +234,6 @@
     localStorage.setItem('app_tasks', JSON.stringify(tasks));
   }
 
-  // כותרת תאריך
   const gregDate = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   document.getElementById('current-date').innerText = `${gregDate} | ${todayHeb.dateDisplay}`;
 
@@ -313,7 +287,6 @@
     }
   }
 
-  /* --- מודאלים דינמיים להוספה ומחיקה --- */
   function openAddModal(type) {
     currentAddType = type;
     const modal = document.getElementById('add-modal');
@@ -400,6 +373,7 @@
     document.getElementById('add-modal').classList.add('hidden');
   }
 
+  /* --- מחיקת פריטים מורחבת (מזהה גם נתונים מגרסאות ישנות) --- */
   function openDeleteModal(type) {
     currentDeleteType = type;
     const modal = document.getElementById('delete-modal');
@@ -407,30 +381,45 @@
     const title = document.getElementById('delete-modal-title');
     list.innerHTML = '';
 
-    let items = [];
+    let itemsSet = new Set();
+
     if (type === 'category') {
       title.innerText = 'לחץ על קטגוריה ראשית למחיקה:';
-      items = categories.map(c => ({ id: c, name: c }));
+      categories.forEach(c => itemsSet.add(c));
+      tasks.forEach(t => { if (t.category) itemsSet.add(t.category); });
     } else if (type === 'assignee') {
       title.innerText = 'לחץ על אחראי/ת למחיקה:';
-      items = assignees.map(a => ({ id: a, name: a }));
+      assignees.forEach(a => itemsSet.add(a));
+      tasks.forEach(t => { if (t.assignee) itemsSet.add(t.assignee); });
     } else if (type === 'subcategory') {
       const parentCategory = document.getElementById('task-category').value;
-      title.innerText = `לחץ על קטגוריה למחיקה (תחת "${parentCategory}"):`;
-      items = subcategories.filter(s => s.parentCategory === parentCategory).map(s => ({ id: s.id, name: s.name, parentCategory: s.parentCategory }));
+      title.innerText = `לחץ על קטגוריה למחיקה:`;
+      
+      subcategories.forEach(s => {
+        if (!parentCategory || s.parentCategory === parentCategory || !s.parentCategory) {
+          itemsSet.add(s.name);
+        }
+      });
+      tasks.forEach(t => {
+        if (t.subcategory && t.subcategory !== 'כללי') {
+          if (!parentCategory || t.category === parentCategory) {
+            itemsSet.add(t.subcategory);
+          }
+        }
+      });
     }
+
+    const items = Array.from(itemsSet);
 
     if (items.length === 0) {
       list.innerHTML = '<div class="text-xs text-gray-400 p-2 text-center">אין פריטים ברשימה למחיקה</div>';
     } else {
-      items.forEach(item => {
+      items.forEach(itemName => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'w-full flex justify-between items-center p-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-100 text-red-700 text-xs font-bold transition text-right cursor-pointer';
-        btn.innerHTML = `<span>${item.name}</span><span class="text-red-500 font-normal">🗑️ מחק</span>`;
-        btn.onclick = () => {
-          deleteItemFromModal(type, item);
-        };
+        btn.innerHTML = `<span>${itemName}</span><span class="text-red-500 font-normal">🗑️ מחק</span>`;
+        btn.onclick = () => deleteItemFromModal(type, itemName);
         list.appendChild(btn);
       });
     }
@@ -445,41 +434,43 @@
     updateSubcategoryDropdown();
   }
 
-  function deleteItemFromModal(type, item) {
-    if (confirm(`האם למחוק את "${item.name}"?`)) {
+  function deleteItemFromModal(type, itemName) {
+    if (confirm(`האם למחוק את "${itemName}" מכל המקומות?`)) {
       if (type === 'category') {
-        categories = categories.filter(c => c !== item.id);
-        subcategories = subcategories.filter(s => s.parentCategory !== item.id);
-        tasks = tasks.filter(t => t.category !== item.id);
-        if (activeCategory === item.id) activeCategory = 'הכל';
-        saveData();
-        updateCategoryDropdown();
-        renderCategoryFilterBar();
-        updateSubcategoryDropdown();
-        updateSubcategoryFilterBar();
-        render();
+        categories = categories.filter(c => c !== itemName);
+        subcategories = subcategories.filter(s => s.parentCategory !== itemName);
+        tasks = tasks.filter(t => t.category !== itemName);
+        if (activeCategory === itemName) activeCategory = 'הכל';
       } else if (type === 'assignee') {
-        assignees = assignees.filter(a => a !== item.id);
-        tasks = tasks.map(t => t.assignee === item.id ? { ...t, assignee: 'שנינו' } : t);
-        if (activeAssignee === item.id) activeAssignee = 'הכל';
-        saveData();
-        updateAssigneeDropdown();
-        renderAssigneeFilterBar();
-        render();
+        assignees = assignees.filter(a => a !== itemName);
+        tasks = tasks.map(t => t.assignee === itemName ? { ...t, assignee: 'שנינו' } : t);
+        if (activeAssignee === itemName) activeAssignee = 'הכל';
       } else if (type === 'subcategory') {
-        subcategories = subcategories.filter(s => s.id !== item.id);
-        tasks = tasks.filter(t => !(t.category === item.parentCategory && t.subcategory === item.name));
-        if (activeSubcategory === item.name) activeSubcategory = 'הכל';
-        saveData();
-        updateSubcategoryDropdown();
-        updateSubcategoryFilterBar();
-        render();
+        subcategories = subcategories.filter(s => s.name !== itemName);
+        tasks = tasks.filter(t => t.subcategory !== itemName);
+        if (activeSubcategory === itemName) activeSubcategory = 'הכל';
       }
+
+      saveData();
+      updateCategoryDropdown();
+      updateAssigneeDropdown();
+      updateSubcategoryDropdown();
+      renderCategoryFilterBar();
+      renderAssigneeFilterBar();
+      updateSubcategoryFilterBar();
+      render();
+
       openDeleteModal(type);
     }
   }
 
-  /* --- ניהול קטגוריות ראשיות --- */
+  function resetAllStorage() {
+    if (confirm('אזהרה: פעולה זו תאפס את כל הקטגוריות והמשימות בחזרה לגרסת הברירת מחדל. להמשיך?')) {
+      localStorage.clear();
+      location.reload();
+    }
+  }
+
   function updateCategoryDropdown() {
     const sel = document.getElementById('task-category');
     if (!sel) return;
@@ -506,16 +497,11 @@
 
   function onCategorySelectChange() {
     const val = document.getElementById('task-category').value;
-    if (val === '__ADD_CAT__') {
-      openAddModal('category');
-    } else if (val === '__DEL_CAT__') {
-      openDeleteModal('category');
-    } else {
-      updateSubcategoryDropdown();
-    }
+    if (val === '__ADD_CAT__') openAddModal('category');
+    else if (val === '__DEL_CAT__') openDeleteModal('category');
+    else updateSubcategoryDropdown();
   }
 
-  /* --- ניהול אחראים --- */
   function updateAssigneeDropdown() {
     const sel = document.getElementById('task-assignee');
     if (!sel) return;
@@ -542,14 +528,10 @@
 
   function onAssigneeSelectChange() {
     const val = document.getElementById('task-assignee').value;
-    if (val === '__ADD_ASS__') {
-      openAddModal('assignee');
-    } else if (val === '__DEL_ASS__') {
-      openDeleteModal('assignee');
-    }
+    if (val === '__ADD_ASS__') openAddModal('assignee');
+    else if (val === '__DEL_ASS__') openDeleteModal('assignee');
   }
 
-  /* --- ניהול קטגוריות משניות --- */
   function updateSubcategoryDropdown() {
     const selectedCat = document.getElementById('task-category').value;
     const subSelect = document.getElementById('task-subcategory');
@@ -576,28 +558,20 @@
 
   function onSubcategorySelectChange() {
     const val = document.getElementById('task-subcategory').value;
-    if (val === '__ADD_SUB__') {
-      openAddModal('subcategory');
-    } else if (val === '__DEL_SUB__') {
-      openDeleteModal('subcategory');
-    }
+    if (val === '__ADD_SUB__') openAddModal('subcategory');
+    else if (val === '__DEL_SUB__') openDeleteModal('subcategory');
   }
 
-  /* --- סרגלי סינון --- */
   function renderCategoryFilterBar() {
     const bar = document.getElementById('category-filter-bar');
     if (!bar) return;
     bar.innerHTML = '';
 
-    const allBtn = createFilterButton('הכל', activeCategory === 'הכל', (btn) => setCategoryFilter('הכל', btn));
-    bar.appendChild(allBtn);
-
-    const dateBtn = createFilterButton('📅 עם תאריך', activeCategory === '📅 עם תאריך', (btn) => setCategoryFilter('📅 עם תאריך', btn));
-    bar.appendChild(dateBtn);
+    bar.appendChild(createFilterButton('הכל', activeCategory === 'הכל', (btn) => setCategoryFilter('הכל', btn)));
+    bar.appendChild(createFilterButton('📅 עם תאריך', activeCategory === '📅 עם תאריך', (btn) => setCategoryFilter('📅 עם תאריך', btn)));
 
     categories.forEach(c => {
-      const btn = createFilterButton(c, activeCategory === c, (b) => setCategoryFilter(c, b));
-      bar.appendChild(btn);
+      bar.appendChild(createFilterButton(c, activeCategory === c, (b) => setCategoryFilter(c, b)));
     });
   }
 
@@ -611,12 +585,10 @@
     label.innerText = 'אחראי:';
     bar.appendChild(label);
 
-    const allBtn = createFilterButton('הכל', activeAssignee === 'הכל', (btn) => setAssigneeFilter('הכל', btn), 'ass');
-    bar.appendChild(allBtn);
+    bar.appendChild(createFilterButton('הכל', activeAssignee === 'הכל', (btn) => setAssigneeFilter('הכל', btn), 'ass'));
 
     assignees.forEach(a => {
-      const btn = createFilterButton(a, activeAssignee === a, (b) => setAssigneeFilter(a, b), 'ass');
-      bar.appendChild(btn);
+      bar.appendChild(createFilterButton(a, activeAssignee === a, (b) => setAssigneeFilter(a, b), 'ass'));
     });
   }
 
@@ -641,20 +613,18 @@
     barBox.classList.remove('hidden');
     buttonsBox.innerHTML = '';
 
-    const allBtn = createFilterButton('הכל', activeSubcategory === 'הכל', () => {
+    buttonsBox.appendChild(createFilterButton('הכל', activeSubcategory === 'הכל', () => {
       activeSubcategory = 'הכל';
       updateSubcategoryFilterBar();
       render();
-    });
-    buttonsBox.appendChild(allBtn);
+    }));
 
     relevantSubs.forEach(s => {
-      const btn = createFilterButton(s.name, activeSubcategory === s.name, () => {
+      buttonsBox.appendChild(createFilterButton(s.name, activeSubcategory === s.name, () => {
         activeSubcategory = s.name;
         updateSubcategoryFilterBar();
         render();
-      });
-      buttonsBox.appendChild(btn);
+      }));
     });
   }
 
@@ -683,7 +653,6 @@
     render();
   }
 
-  /* --- הוספת משימה --- */
   function addTask() {
     const title = document.getElementById('task-title').value.trim();
     const category = document.getElementById('task-category').value;
@@ -693,9 +662,7 @@
 
     if (!title) return alert('נא להזין תיאור משימה');
 
-    let hebDateDisplay = null;
-    let hebSortKey = null;
-    let dayVal = null, monthVal = null, yearVal = null;
+    let hebDateDisplay = null, hebSortKey = null, dayVal = null, monthVal = null, yearVal = null;
 
     if (hasDate) {
       dayVal = parseInt(document.getElementById('task-heb-day').value) || todayHeb.day;
@@ -707,19 +674,7 @@
       hebSortKey = Math.floor(yearVal * 10000 + monthVal * 100 + dayVal);
     }
 
-    tasks.push({
-      id: Date.now().toString(),
-      title,
-      category,
-      assignee,
-      subcategory,
-      hebrewDateDisplay: hebDateDisplay,
-      hebrewSortKey: hebSortKey,
-      hebDay: dayVal,
-      hebMonth: monthVal,
-      hebYear: yearVal,
-      completed: false
-    });
+    tasks.push({ id: Date.now().toString(), title, category, assignee, subcategory, hebrewDateDisplay: hebDateDisplay, hebrewSortKey: hebSortKey, hebDay: dayVal, hebMonth: monthVal, hebYear: yearVal, completed: false });
 
     saveData();
     document.getElementById('task-title').value = '';
@@ -774,9 +729,7 @@
 
     if (!newTitle) return;
 
-    let hebDateDisplay = null;
-    let hebSortKey = null;
-    let dayVal = null, monthVal = null, yearVal = null;
+    let hebDateDisplay = null, hebSortKey = null, dayVal = null, monthVal = null, yearVal = null;
 
     if (hasDate) {
       dayVal = parseInt(document.getElementById(`edit-heb-day-${id}`).value) || todayHeb.day;
@@ -788,17 +741,7 @@
       hebSortKey = Math.floor(yearVal * 10000 + monthVal * 100 + dayVal);
     }
 
-    tasks = tasks.map(t => t.id === id ? {
-      ...t,
-      title: newTitle,
-      assignee: newAssignee,
-      hebrewDateDisplay: hebDateDisplay,
-      hebrewSortKey: hebSortKey,
-      hebDay: dayVal,
-      hebMonth: monthVal,
-      hebYear: yearVal,
-      isEditing: false
-    } : t);
+    tasks = tasks.map(t => t.id === id ? { ...t, title: newTitle, assignee: newAssignee, hebrewDateDisplay: hebDateDisplay, hebrewSortKey: hebSortKey, hebDay: dayVal, hebMonth: monthVal, hebYear: yearVal, isEditing: false } : t);
 
     saveData();
     render();
@@ -806,9 +749,7 @@
 
   function sortTasks(taskList) {
     return taskList.sort((a, b) => {
-      if (a.hebrewSortKey && b.hebrewSortKey) {
-        return a.hebrewSortKey - b.hebrewSortKey;
-      }
+      if (a.hebrewSortKey && b.hebrewSortKey) return a.hebrewSortKey - b.hebrewSortKey;
       if (a.hebrewSortKey && !b.hebrewSortKey) return -1;
       if (!a.hebrewSortKey && b.hebrewSortKey) return 1;
       return 0;
@@ -855,13 +796,9 @@
 
     let filtered = tasks.filter(t => {
       let matchCat = false;
-      if (activeCategory === 'הכל') {
-        matchCat = true;
-      } else if (activeCategory === '📅 עם תאריך') {
-        matchCat = !!t.hebrewSortKey || !!t.hebrewDateDisplay;
-      } else {
-        matchCat = t.category === activeCategory;
-      }
+      if (activeCategory === 'הכל') matchCat = true;
+      else if (activeCategory === '📅 עם תאריך') matchCat = !!t.hebrewSortKey || !!t.hebrewDateDisplay;
+      else matchCat = t.category === activeCategory;
 
       const matchAss = activeAssignee === 'הכל' || t.assignee === activeAssignee;
       const matchSub = activeSubcategory === 'הכל' || t.subcategory === activeSubcategory;
@@ -907,9 +844,7 @@
 
       const header = document.createElement('div');
       header.className = 'flex justify-between items-center mb-1';
-      header.innerHTML = `
-        <span class="text-xs font-bold text-gray-700">📂 ${subName} ${activeCategory === 'הכל' ? `(${catName})` : ''}</span>
-      `;
+      header.innerHTML = `<span class="text-xs font-bold text-gray-700">📂 ${subName} ${activeCategory === 'הכל' ? `(${catName})` : ''}</span>`;
       groupCard.appendChild(header);
 
       items.forEach(task => groupCard.appendChild(createTaskCard(task)));
@@ -973,7 +908,6 @@
     return card;
   }
 
-  // אתחול ראשוני
   updateCategoryDropdown();
   updateAssigneeDropdown();
   updateSubcategoryDropdown();
