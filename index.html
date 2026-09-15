@@ -123,7 +123,7 @@
       <button onclick="setAssigneeFilter('אסתי', this)" class="ass-filter-btn bg-white text-gray-600 border border-gray-200 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap">👩 אסתי</button>
     </div>
 
-    <!-- סרגל תת-קטגוריות (נוסף חדש!) -->
+    <!-- סרגל תת-קטגוריות למעלה כולל אפשרות מחיקה -->
     <div id="subcategory-filter-bar" class="hidden flex items-center gap-1.5 overflow-x-auto pb-1">
       <span class="text-xs text-gray-400 pl-1 font-medium whitespace-nowrap">תת-קטגוריה:</span>
       <div id="subcategory-filter-buttons" class="flex gap-1.5 overflow-x-auto"></div>
@@ -318,18 +318,33 @@
     };
     buttonsBox.appendChild(allBtn);
 
-    // כפתור לכל תת-קטגוריה
+    // כפתורים של תתי-קטגוריות עם כפתור מחיקה ✕
     relevantSubs.forEach(s => {
-      const btn = document.createElement('button');
+      const chip = document.createElement('div');
       const isActive = activeSubcategory === s.name;
-      btn.className = `sub-filter-btn ${isActive ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200'} px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition`;
-      btn.innerText = s.name;
-      btn.onclick = () => {
+      chip.className = `flex items-center gap-1.5 ${isActive ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border border-gray-200'} px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition`;
+
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'cursor-pointer';
+      titleSpan.innerText = s.name;
+      titleSpan.onclick = () => {
         activeSubcategory = s.name;
         updateSubcategoryFilterBar();
         render();
       };
-      buttonsBox.appendChild(btn);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = `font-bold text-[11px] px-0.5 rounded transition ${isActive ? 'text-indigo-200 hover:text-white' : 'text-gray-400 hover:text-red-600'}`;
+      delBtn.innerText = '✕';
+      delBtn.title = 'מחק תת-קטגוריה';
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        deleteSubcategory(s.id, s.name, s.parentCategory);
+      };
+
+      chip.appendChild(titleSpan);
+      chip.appendChild(delBtn);
+      buttonsBox.appendChild(chip);
     });
   }
 
@@ -577,7 +592,7 @@
       return;
     }
 
-    // אם נבחרה תת-קטגוריה ספציפית
+    // אם נבחרה תת-קטגוריה ספציפית בסרגל
     if (activeSubcategory !== 'הכל') {
       filtered.forEach(task => container.appendChild(createTaskCard(task)));
       return;
