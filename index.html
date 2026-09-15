@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>המשימות שלנו v1.0.4</title>
+  <title>המשימות שלנו v1.0.5</title>
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="המשימות שלנו">
 
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5; border-radius: 20%;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='300'>📋</text></svg>">
+  <!-- אייקון / לוגו מותאם -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='280'>📋</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' style='background:%234f46e5;'><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='280'>📋</text></svg>">
 
-  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=4","display":"standalone","background_color":"%23ffffff","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27300%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
+  <!-- מניפסט עם הגדרת הלוגו למסך הבית -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"המשימות שלנו","short_name":"משימות","start_url":".?v=5","display":"standalone","background_color":"%23ffffff","theme_color":"%234f46e5","icons":[{"src":"data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27 style=%27background:%234f46e5;%27><text x=%2750%%27 y=%2755%%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-size=%27280%27>📋</text></svg>","sizes":"512x512","type":"image/svg+xml"}]}'>
   
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -29,7 +31,7 @@
 
   <!-- כותרת ותאריך -->
   <header class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center mb-4 relative">
-    <span class="absolute top-2 left-3 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v1.0.4</span>
+    <span class="absolute top-2 left-3 text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">v1.0.5</span>
     <h1 class="text-2xl font-bold text-gray-800 mb-1">המשימות שלנו 📋</h1>
     <div id="current-date" class="text-xs font-bold text-indigo-600 mb-2"></div>
     
@@ -39,17 +41,14 @@
       <button onclick="switchUserGroup()" class="text-[10px] text-indigo-600 underline hover:text-indigo-900">החלף</button>
     </div>
 
-    <!-- כפתורי פעולה מהירים -->
-    <div class="space-y-2 mt-2">
-      <!-- כפתור להתקנת האפליקציה בלחיצה אחת -->
-      <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto w-full cursor-pointer">
-        📲 התקן את האפליקציה למכשיר
+    <!-- כפתור הוספה למסך הבית -->
+    <div class="mt-2">
+      <button id="install-pwa-btn" onclick="installPWA()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto w-full cursor-pointer">
+        📲 הוסף למסך הבית
       </button>
-
-      <!-- כפתור הורדת קובץ האפליקציה למכשיר -->
-      <button onclick="downloadAppFile()" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto w-full cursor-pointer">
-        📥 הורד את קובץ האפליקציה למכשיר
-      </button>
+      <div id="install-hint" class="hidden text-[11px] text-gray-500 bg-gray-50 p-2 rounded-xl border border-gray-100 text-center">
+        💡 כדי להוסיף למסך הבית באייפון: לחץ על כפתור השיתוף (📤) ואז על <strong>"הוסף למסך הבית" (Add to Home Screen)</strong>.
+      </div>
     </div>
   </header>
 
@@ -209,29 +208,27 @@
   </div>
 
 <script>
-  // פונקציה להורדת קובץ האפליקציה ישירות מתוך הדפדפן
-  function downloadAppFile() {
-    const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'tasks-app.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  // ניהול התקנת PWA
+  // ניהול התקנה למסך הבית (PWA)
   let deferredPrompt;
   const installBtn = document.getElementById('install-pwa-btn');
+  const installHint = document.getElementById('install-hint');
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     if (installBtn) installBtn.classList.remove('hidden');
+    if (installHint) installHint.classList.add('hidden');
   });
+
+  // זיהוי מכשירי אייפון / ספארי שבהם אין אירוע אוטומטי
+  function checkIOSHomeButton() {
+    const isIOS = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+    const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+    if (isIOS && !isInStandaloneMode) {
+      if (installHint) installHint.classList.remove('hidden');
+    }
+  }
+  checkIOSHomeButton();
 
   async function installPWA() {
     if (!deferredPrompt) return;
@@ -245,6 +242,7 @@
 
   window.addEventListener('appinstalled', () => {
     if (installBtn) installBtn.classList.add('hidden');
+    if (installHint) installHint.classList.add('hidden');
     deferredPrompt = null;
   });
 
