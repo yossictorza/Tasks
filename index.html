@@ -54,6 +54,12 @@
         </div>
       </div>
 
+      <!-- שדה תאריך עברי אופציונלי -->
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">תאריך עברי (אופציונלי)</label>
+        <input type="text" id="task-hebrew-date" placeholder="למשל: כ&quot;ה בתשרי / ערב חג" class="w-full p-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500">
+      </div>
+
       <!-- בחירת תת-קטגוריה / חנות -->
       <div>
         <div class="flex justify-between items-center mb-1">
@@ -95,7 +101,7 @@
   <main id="tasks-container" class="space-y-3"></main>
 
 <script>
-  // ⚠️ חשוב מאוד: החליפו את הערכים למטה בפרטי ה-Firebase האמיתיים שלכם!
+  // ⚠️ הציבו כאן את מפתחות ה-Firebase האמיתיים שלכם כדי שמידע ימשיך להישמר!
   const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -113,9 +119,13 @@
   let activeCategory = 'הכל';
   let activeAssignee = 'הכל';
 
-  document.getElementById('current-date').innerText = new Date().toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  // חישוב והצגת תאריך לועזי ועברי בכותרת
+  const today = new Date();
+  const gregDate = today.toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const hebDate = today.toLocaleDateString('he-IL-u-ca-hebrew', { year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('current-date').innerText = `${gregDate} | ${hebDate}`;
 
-  // טעינת משימות בענן בזמן אמת
+  // טעינת משימות בזמן אמת
   db.collection('tasks').onSnapshot((snapshot) => {
     tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     render();
@@ -173,6 +183,7 @@
     const category = document.getElementById('task-category').value;
     const assignee = document.getElementById('task-assignee').value;
     const subcategory = document.getElementById('task-subcategory').value;
+    const hebrewDate = document.getElementById('task-hebrew-date').value.trim();
 
     if (!title) return alert('נא להזין תיאור משימה');
 
@@ -181,11 +192,13 @@
       category,
       assignee,
       subcategory,
+      hebrewDate: hebrewDate || null,
       completed: false,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     document.getElementById('task-title').value = '';
+    document.getElementById('task-hebrew-date').value = '';
   }
 
   function setCategoryFilter(cat, btn) {
@@ -226,12 +239,14 @@
   function saveEdit(id) {
     const newTitle = document.getElementById(`edit-title-${id}`).value.trim();
     const newAssignee = document.getElementById(`edit-assignee-${id}`).value;
+    const newHebrewDate = document.getElementById(`edit-hebrew-date-${id}`).value.trim();
 
     if (!newTitle) return;
 
     db.collection('tasks').doc(id).update({
       title: newTitle,
-      assignee: newAssignee
+      assignee: newAssignee,
+      hebrewDate: newHebrewDate || null
     });
   }
 
@@ -239,7 +254,6 @@
     const container = document.getElementById('tasks-container');
     container.innerHTML = '';
 
-    // סינון דינמי כפול: לפי קטגוריה ואחראי
     let filtered = tasks.filter(t => {
       const matchCat = activeCategory === 'הכל' || t.category === activeCategory;
       const matchAss = activeAssignee === 'הכל' || t.assignee === activeAssignee;
@@ -251,7 +265,6 @@
       return;
     }
 
-    // 1. משימות כלליות (ללא תת-קטגוריה)
     const generalTasks = filtered.filter(t => !t.subcategory || t.subcategory === 'כללי');
     if (generalTasks.length > 0) {
       if (activeCategory !== 'הכל') {
@@ -263,7 +276,6 @@
       generalTasks.forEach(task => container.appendChild(createTaskCard(task)));
     }
 
-    // 2. מקובץ לפי תתי-קטגוריות / חנויות
     const subGrouped = {};
     filtered.filter(t => t.subcategory && t.subcategory !== 'כללי').forEach(t => {
       const key = `${t.category}___${t.subcategory}`;
@@ -299,12 +311,13 @@
       card.innerHTML = `
         <div class="w-full space-y-2">
           <input type="text" id="edit-title-${task.id}" value="${task.title}" class="w-full p-1.5 border rounded-lg text-sm">
-          <div class="flex gap-2">
+          <div class="grid grid-cols-2 gap-2">
             <select id="edit-assignee-${task.id}" class="p-1 border rounded-lg text-xs">
               <option value="שנינו" ${task.assignee === 'שנינו' ? 'selected' : ''}>שנינו</option>
               <option value="יוסי" ${task.assignee === 'יוסי' ? 'selected' : ''}>יוסי</option>
               <option value="אסתי" ${task.assignee === 'אסתי' ? 'selected' : ''}>אסתי</option>
             </select>
+            <input type="text" id="edit-hebrew-date-${task.id}" value="${task.hebrewDate || ''}" placeholder="תאריך עברי" class="p-1 border rounded-lg text-xs">
           </div>
           <button onclick="saveEdit('${task.id}')" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold">שמור</button>
         </div>
@@ -322,6 +335,7 @@
             <div class="flex gap-1 mt-0.5 flex-wrap">
               <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${badgeColor}">${task.assignee}</span>
               ${activeCategory === 'הכל' ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-bold">🏷️ ${task.category}</span>` : ''}
+              ${task.hebrewDate ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-bold">📅 ${task.hebrewDate}</span>` : ''}
             </div>
           </div>
         </div>
