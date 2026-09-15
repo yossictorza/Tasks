@@ -38,7 +38,7 @@
     <!-- מחוון חשבון / קוד משפחתי -->
     <div class="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-800 text-xs px-3 py-1 rounded-full font-bold mb-2">
       <span>🔑 חשבון: <strong id="display-group-name">...</strong></span>
-      <button onclick="switchUserGroup()" class="text-[10px] text-indigo-600 underline hover:text-indigo-900">החלף</button>
+      <button onclick="switchUserGroup()" class="text-[10px] text-indigo-600 underline hover:text-indigo-900 cursor-pointer">החלף</button>
     </div>
 
     <!-- כפתור הוספה למסך הבית -->
@@ -76,9 +76,9 @@
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs text-gray-500">קטגוריה ראשית</label>
             <div class="flex gap-1 text-[10px]">
-              <button type="button" onclick="openAddModal('category')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
-              <button type="button" onclick="openEditModal('category')" class="text-amber-600 font-bold hover:underline">✏️</button>
-              <button type="button" onclick="openDeleteModal('category')" class="text-red-500 font-bold hover:underline">🗑️</button>
+              <button type="button" onclick="openAddModal('category')" class="text-indigo-600 font-bold hover:underline cursor-pointer">+ הוסף</button>
+              <button type="button" onclick="openEditModal('category')" class="text-amber-600 font-bold hover:underline cursor-pointer">✏️</button>
+              <button type="button" onclick="openDeleteModal('category')" class="text-red-500 font-bold hover:underline cursor-pointer">🗑️</button>
             </div>
           </div>
           <select id="task-category" onchange="onCategorySelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
@@ -89,9 +89,9 @@
           <div class="flex justify-between items-center mb-1">
             <label class="block text-xs text-gray-500">אחראי/ת</label>
             <div class="flex gap-1 text-[10px]">
-              <button type="button" onclick="openAddModal('assignee')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
-              <button type="button" onclick="openEditModal('assignee')" class="text-amber-600 font-bold hover:underline">✏️</button>
-              <button type="button" onclick="openDeleteModal('assignee')" class="text-red-500 font-bold hover:underline">🗑️</button>
+              <button type="button" onclick="openAddModal('assignee')" class="text-indigo-600 font-bold hover:underline cursor-pointer">+ הוסף</button>
+              <button type="button" onclick="openEditModal('assignee')" class="text-amber-600 font-bold hover:underline cursor-pointer">✏️</button>
+              <button type="button" onclick="openDeleteModal('assignee')" class="text-red-500 font-bold hover:underline cursor-pointer">🗑️</button>
             </div>
           </div>
           <select id="task-assignee" onchange="onAssigneeSelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
@@ -129,9 +129,9 @@
         <div class="flex justify-between items-center mb-1">
           <label class="block text-xs text-gray-500">קטגוריה / חנות (רשות)</label>
           <div class="flex gap-1 text-[10px]">
-            <button type="button" onclick="openAddModal('subcategory')" class="text-indigo-600 font-bold hover:underline">+ הוסף</button>
-            <button type="button" onclick="openEditModal('subcategory')" class="text-amber-600 font-bold hover:underline">✏️</button>
-            <button type="button" onclick="openDeleteModal('subcategory')" class="text-red-500 font-bold hover:underline">🗑️</button>
+            <button type="button" onclick="openAddModal('subcategory')" class="text-indigo-600 font-bold hover:underline cursor-pointer">+ הוסף</button>
+            <button type="button" onclick="openEditModal('subcategory')" class="text-amber-600 font-bold hover:underline cursor-pointer">✏️</button>
+            <button type="button" onclick="openDeleteModal('subcategory')" class="text-red-500 font-bold hover:underline cursor-pointer">🗑️</button>
           </div>
         </div>
         <select id="task-subcategory" onchange="onSubcategorySelectChange()" class="w-full p-2 border border-gray-200 rounded-xl bg-white text-sm"></select>
@@ -175,16 +175,14 @@
     </div>
   </div>
 
-  <!-- מודאל עריכת קטגוריות / אחראים -->
+  <!-- מודאל עריכה -->
   <div id="edit-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3">
       <div class="flex justify-between items-center border-b pb-2">
         <h3 id="edit-modal-title" class="text-sm font-bold text-gray-800">עריכת פריטים:</h3>
         <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm cursor-pointer">✕</button>
       </div>
-      
       <div id="edit-modal-list" class="space-y-2 max-h-60 overflow-y-auto pt-1"></div>
-
       <div class="flex justify-end pt-2 border-t border-gray-100">
         <button onclick="closeEditModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl cursor-pointer">סגור</button>
       </div>
@@ -198,9 +196,7 @@
         <h3 id="delete-modal-title" class="text-sm font-bold text-gray-800">לחץ על מה שברצונך למחוק:</h3>
         <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600 font-bold text-sm cursor-pointer">✕</button>
       </div>
-      
       <div id="delete-modal-list" class="space-y-1.5 max-h-60 overflow-y-auto pt-1"></div>
-
       <div class="flex justify-end pt-2 border-t border-gray-100">
         <button onclick="closeDeleteModal()" class="px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-xl cursor-pointer">סגור</button>
       </div>
@@ -208,7 +204,6 @@
   </div>
 
 <script>
-  // ניהול התקנה למסך הבית (PWA)
   let deferredPrompt;
   const installBtn = document.getElementById('install-pwa-btn');
   const installHint = document.getElementById('install-hint');
@@ -220,7 +215,6 @@
     if (installHint) installHint.classList.add('hidden');
   });
 
-  // זיהוי מכשירי אייפון / ספארי שבהם אין אירוע אוטומטי
   function checkIOSHomeButton() {
     const isIOS = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
@@ -246,7 +240,6 @@
     deferredPrompt = null;
   });
 
-  // הגדרות Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyDLs89sfyIr-6aBT4A_OcXOVhLLeauWOR0",
     authDomain: "my-tasks-app-3e4da.firebaseapp.com",
@@ -259,7 +252,6 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // ניהול קוד משפחתי / שם משתמש
   let userGroup = localStorage.getItem('app_userGroup');
 
   function checkUserGroup() {
@@ -350,7 +342,6 @@
   const CATEGORY_EMOJIS = ['🛒', '🏠', '⏰', '🧹', '📦', '🚗', '💼', '🍕', '💊', '🛠️', '📌', '⭐', '📝', '🍞', '🥩', '🧼'];
   const ASSIGNEE_EMOJIS = ['👨', '👩', '👫', '👤', '🧑', '👧', '👦', '👵', '👴', '⭐'];
 
-  // סנכרון מול Cloud Firestore
   function listenToCloudData() {
     if (unsubscribeListener) unsubscribeListener();
 
@@ -437,7 +428,6 @@
     }
   }
 
-  /* --- מודאל הוספה --- */
   function openAddModal(type) {
     currentAddType = type;
     const modal = document.getElementById('add-modal');
@@ -506,7 +496,6 @@
     document.getElementById('add-modal').classList.add('hidden');
   }
 
-  /* --- מודאל עריכה --- */
   function openEditModal(type) {
     currentEditType = type;
     const modal = document.getElementById('edit-modal');
@@ -589,7 +578,6 @@
     openEditModal(type);
   }
 
-  /* --- מודאל מחיקה --- */
   function openDeleteModal(type) {
     currentDeleteType = type;
     const modal = document.getElementById('delete-modal');
@@ -885,7 +873,6 @@
     if (!container) return;
     container.innerHTML = '';
 
-    // משימות להיום (תאריך עברי תואם להיום)
     const todayTasks = tasks.filter(t => !t.completed && t.hebDate && t.hebDate.sortKey === todayHeb.sortKey);
     if (todayTasks.length > 0 && todayBanner && todayTasksList && todayCount) {
       todayBanner.classList.remove('hidden');
@@ -909,7 +896,6 @@
       todayBanner.classList.add('hidden');
     }
 
-    // סינון רשימת המשימות הראשית
     let filtered = tasks.filter(t => {
       if (activeCategory === '📅 עם תאריך') {
         if (!t.hebDate) return false;
@@ -967,7 +953,6 @@
     });
   }
 
-  // הפעלה ראשונית של האזנה לנתונים בענן
   listenToCloudData();
 </script>
 </body>
